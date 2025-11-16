@@ -717,6 +717,7 @@ export const documentsRelations = relations(documents, ({ one, many }) => ({
   tagAssignments: many(documentTagAssignments),
   permissions: many(documentPermissions),
   versions: many(documentVersions),
+  shares: many(documentShares),
 }))
 
 // Folders Relations
@@ -888,5 +889,17 @@ export const apiKeysRelations = relations(apiKeys, ({ one }) => ({
   organization: one(organizations, {
     fields: [apiKeys.orgId],
     references: [organizations.id],
+  }),
+}))
+
+// Document Shares Relations
+export const documentSharesRelations = relations(documentShares, ({ one }) => ({
+  document: one(documents, {
+    fields: [documentShares.documentId],
+    references: [documents.id],
+  }),
+  createdByUser: one(users, {
+    fields: [documentShares.createdBy],
+    references: [users.id],
   }),
 }))
