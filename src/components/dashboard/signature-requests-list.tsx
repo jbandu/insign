@@ -10,16 +10,16 @@ import { useRouter } from 'next/navigation'
 interface SignatureRequest {
   id: string
   title: string
-  status: string
-  workflowType: string
-  createdAt: Date
+  status: string | null
+  workflowType: string | null
+  createdAt: Date | null
   document: {
     name: string
   }
   participants: Array<{
     id: string
     email: string
-    status: string
+    status: string | null
   }>
 }
 
@@ -113,8 +113,8 @@ export function SignatureRequestsList({ requests }: SignatureRequestsListProps) 
                   Document: {request.document.name}
                 </p>
                 <div className="flex items-center gap-2 mt-2">
-                  <Badge variant={getStatusColor(request.status) as any}>
-                    {request.status.replace('_', ' ')}
+                  <Badge variant={getStatusColor(request.status || 'draft') as any}>
+                    {(request.status || 'draft').replace('_', ' ')}
                   </Badge>
                   <span className="text-xs text-muted-foreground">
                     {request.workflowType === 'sequential' ? 'Sequential' : 'Parallel'}
@@ -158,7 +158,7 @@ export function SignatureRequestsList({ requests }: SignatureRequestsListProps) 
               </>
             )}
 
-            {['sent', 'in_progress'].includes(request.status) && (
+            {request.status && ['sent', 'in_progress'].includes(request.status) && (
               <Button
                 variant="ghost"
                 size="sm"

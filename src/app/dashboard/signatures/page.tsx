@@ -26,9 +26,9 @@ export default async function SignaturesPage() {
 
   // Group by status
   const drafts = requests.filter(r => r.status === 'draft')
-  const pending = requests.filter(r => ['sent', 'in_progress'].includes(r.status))
+  const pending = requests.filter(r => r.status && ['sent', 'in_progress'].includes(r.status))
   const completed = requests.filter(r => r.status === 'completed')
-  const other = requests.filter(r => ['declined', 'expired', 'cancelled'].includes(r.status))
+  const other = requests.filter(r => r.status && ['declined', 'expired', 'cancelled'].includes(r.status))
 
   return (
     <div className="space-y-6">
