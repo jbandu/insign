@@ -15,6 +15,12 @@ import { createSignatureRequest, sendSignatureRequest } from '@/app/actions/sign
 import { createSignatureField } from '@/app/actions/signature-fields'
 import { Loader2, ArrowLeft, ArrowRight, Plus, Trash2, Check, FileText, Users, Pencil, Send, User } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { Document, Page, pdfjs } from 'react-pdf'
+import 'react-pdf/dist/esm/Page/AnnotationLayer.css'
+import 'react-pdf/dist/esm/Page/TextLayer.css'
+
+// Configure PDF.js worker
+pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`
 
 interface Document {
   id: string
@@ -32,6 +38,7 @@ interface PlacedField {
   id?: string
   participantIndex: number
   type: 'signature' | 'initials' | 'date' | 'text' | 'checkbox'
+  pageNumber: number
   x: number
   y: number
   width: number
@@ -48,6 +55,9 @@ export function SignatureRequestWizard({ documents }: SignatureRequestWizardProp
   const [placedFields, setPlacedFields] = useState<PlacedField[]>([])
   const [selectedFieldType, setSelectedFieldType] = useState<PlacedField['type']>('signature')
   const [selectedParticipantIndex, setSelectedParticipantIndex] = useState(0)
+  const [numPages, setNumPages] = useState<number>(0)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [pdfWidth, setPdfWidth] = useState<number>(800)
 
   const {
     register,
@@ -105,6 +115,7 @@ export function SignatureRequestWizard({ documents }: SignatureRequestWizardProp
     const newField: PlacedField = {
       participantIndex: selectedParticipantIndex,
       type: selectedFieldType,
+      pageNumber: currentPage,
       x,
       y,
       width: fieldConfig.width,
@@ -194,7 +205,7 @@ export function SignatureRequestWizard({ documents }: SignatureRequestWizardProp
           requestId: createdRequestId,
           participantId,
           fieldType: field.type,
-          pageNumber: 1,
+          pageNumber: field.pageNumber,
           positionX: field.x,
           positionY: field.y,
           width: field.width,
@@ -550,22 +561,42 @@ export function SignatureRequestWizard({ documents }: SignatureRequestWizardProp
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div
-                  className="relative border-2 border-dashed rounded-lg bg-gray-50 min-h-[800px] cursor-crosshair"
-                  onClick={handleDocumentClick}
-                >
-                  {/* Document Placeholder */}
-                  <div className="absolute inset-0 flex items-center justify-center text-muted-foreground pointer-events-none">
-                    <div className="text-center space-y-2">
-                      <FileText className="h-12 w-12 mx-auto" />
-                      <p className="font-medium">{selectedDocument?.name}</p>
-                      <p className="text-sm">Click to place fields</p>
-                    </div>
-                  </div>
+                <div className="relative">
+                  {/* PDF Renderer */}
+                  {selectedDocument?.filePath ? (
+                    <Document
+                      file={selectedDocument.filePath}
+                      onLoadSuccess={({ numPages }) => setNumPages(numPages)}
+                      loading={
+                        <div className="flex items-center justify-center min-h-[800px] border-2 border-dashed rounded-lg bg-gray-50">
+                          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                        </div>
+                      }
+                      error={
+                        <div className="flex items-center justify-center min-h-[800px] border-2 border-dashed rounded-lg bg-gray-50">
+                          <div className="text-center text-muted-foreground">
+                            <FileText className="h-12 w-12 mx-auto mb-2" />
+                            <p>Failed to load PDF</p>
+                            <p className="text-sm mt-1">Click on the area below to place fields</p>
+                          </div>
+                        </div>
+                      }
+                    >
+                      <div
+                        className="relative cursor-crosshair inline-block"
+                        onClick={handleDocumentClick}
+                      >
+                        <Page
+                          pageNumber={currentPage}
+                          width={pdfWidth}
+                          renderTextLayer={true}
+                          renderAnnotationLayer={true}
+                        />
 
-                  {/* Render Placed Fields */}
-                  {placedFields.map((field, index) => {
+                        {/* Render Placed Fields (only for current page) */}
+                  {placedFields.filter(f => f.pageNumber === currentPage).map((field, index) => {
                     const fieldType = fieldTypes.find(ft => ft.value === field.type)!
+                    const actualIndex = placedFields.indexOf(field)
                     return (
                       <div
                         key={index}
@@ -588,7 +619,7 @@ export function SignatureRequestWizard({ documents }: SignatureRequestWizardProp
                         </div>
                         <button
                           type="button"
-                          onClick={() => removeField(index)}
+                          onClick={() => removeField(actualIndex)}
                           className="absolute -top-2 -right-2 p-1 bg-destructive text-destructive-foreground rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                         >
                           <Trash2 className="h-3 w-3" />
@@ -599,6 +630,44 @@ export function SignatureRequestWizard({ documents }: SignatureRequestWizardProp
                       </div>
                     )
                   })}
+                      </div>
+                    </Document>
+                  ) : (
+                    <div className="flex items-center justify-center min-h-[800px] border-2 border-dashed rounded-lg bg-gray-50">
+                      <div className="text-center text-muted-foreground">
+                        <FileText className="h-12 w-12 mx-auto mb-2" />
+                        <p className="font-medium">No document selected</p>
+                        <p className="text-sm">Select a document in step 1 to view it here</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Page Navigation */}
+                  {selectedDocument?.filePath && numPages > 1 && (
+                    <div className="flex items-center justify-center gap-4 mt-4 p-3 bg-gray-50 rounded-lg">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                        disabled={currentPage <= 1}
+                      >
+                        <ArrowLeft className="h-4 w-4" />
+                      </Button>
+                      <span className="text-sm font-medium">
+                        Page {currentPage} of {numPages}
+                      </span>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCurrentPage(p => Math.min(numPages, p + 1))}
+                        disabled={currentPage >= numPages}
+                      >
+                        <ArrowRight className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  )}
                 </div>
 
                 {/* Field Summary */}
