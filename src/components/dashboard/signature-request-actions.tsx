@@ -19,7 +19,7 @@ import {
 
 interface SignatureRequest {
   id: string
-  status: string
+  status: string | null
   title: string
 }
 
@@ -138,7 +138,7 @@ export function SignatureRequestActions({ request }: SignatureRequestActionsProp
         </>
       )}
 
-      {['sent', 'in_progress'].includes(request.status) && (
+      {request.status && ['sent', 'in_progress'].includes(request.status) && (
         <AlertDialog>
           <AlertDialogTrigger asChild>
             <Button variant="destructive" disabled={isLoading}>

@@ -20,14 +20,14 @@ import {
 interface Participant {
   id: string
   email: string
-  fullName: string
+  fullName: string | null
   role: string
 }
 
 interface Document {
   id: string
   name: string
-  blobUrl: string | null
+  filePath: string
 }
 
 interface SignatureRequest {
@@ -40,13 +40,13 @@ interface SignatureRequest {
 interface SignatureField {
   id: string
   participantId: string
-  fieldType: string
+  type: string
   pageNumber: number
-  positionX: number
-  positionY: number
+  x: number
+  y: number
   width: number
   height: number
-  isRequired: boolean
+  required: boolean | null
   participant: Participant
 }
 
@@ -220,14 +220,14 @@ export function SignatureFieldEditor({ request, existingFields }: SignatureField
                 <Pencil className="h-12 w-12 mx-auto" />
                 <p className="font-medium">{request.document.name}</p>
                 <p className="text-sm">Click to place fields</p>
-                {request.document.blobUrl && (
+                {request.document.filePath && (
                   <Button
                     variant="outline"
                     size="sm"
                     asChild
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <a href={request.document.blobUrl} target="_blank" rel="noopener noreferrer">
+                    <a href={request.document.filePath} target="_blank" rel="noopener noreferrer">
                       View Original Document
                     </a>
                   </Button>
@@ -241,10 +241,10 @@ export function SignatureFieldEditor({ request, existingFields }: SignatureField
               return (
                 <div
                   key={field.id}
-                  className={`absolute border-2 ${getParticipantColor(field.participantId)} ${getFieldColor(field.fieldType)} bg-opacity-20 rounded flex items-center justify-center group`}
+                  className={`absolute border-2 ${getParticipantColor(field.participantId)} ${getFieldColor(field.type)} bg-opacity-20 rounded flex items-center justify-center group`}
                   style={{
-                    left: field.positionX,
-                    top: field.positionY,
+                    left: field.x,
+                    top: field.y,
                     width: field.width,
                     height: field.height,
                   }}
@@ -252,7 +252,7 @@ export function SignatureFieldEditor({ request, existingFields }: SignatureField
                 >
                   <div className="flex items-center gap-1 text-xs font-medium px-2">
                     <User className="h-3 w-3" />
-                    {fieldTypes.find(ft => ft.value === field.fieldType)?.label}
+                    {fieldTypes.find(ft => ft.value === field.type)?.label}
                   </div>
                   <button
                     onClick={() => handleDeleteField(field.id)}

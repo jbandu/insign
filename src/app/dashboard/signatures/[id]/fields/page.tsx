@@ -41,6 +41,10 @@ export default async function SignatureFieldsPage({ params }: SignatureFieldsPag
 
   const request = requestResult.data
 
+  if (!request) {
+    notFound()
+  }
+
   // Only allow field placement for draft requests
   if (request.status !== 'draft') {
     redirect(`/dashboard/signatures/${params.id}`)
