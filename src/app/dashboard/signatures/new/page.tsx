@@ -1,5 +1,5 @@
 import { getDocuments } from '@/app/actions/documents'
-import { NewSignatureRequestForm } from '@/components/dashboard/new-signature-request-form'
+import { SignatureRequestWizard } from '@/components/dashboard/signature-request-wizard'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft } from 'lucide-react'
@@ -66,12 +66,12 @@ export default async function NewSignatureRequestPage() {
         <div>
           <h2 className="text-3xl font-bold tracking-tight">New Signature Request</h2>
           <p className="text-muted-foreground">
-            Create a new signature request for your documents
+            Follow the wizard to create and send your signature request
           </p>
         </div>
       </div>
 
-      <NewSignatureRequestForm documents={documents} />
+      <SignatureRequestWizard documents={documents} />
     </div>
   )
 }
