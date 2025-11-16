@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { FileText, Download, Trash2, FolderOpen, File, Shield, History } from 'lucide-react'
+import { FileText, Download, Trash2, FolderOpen, File, Shield, History, Share2 } from 'lucide-react'
 import { deleteDocument } from '@/app/actions/documents'
 import { ShareDocumentDialog } from './share-document-dialog'
 import { useRouter } from 'next/navigation'
