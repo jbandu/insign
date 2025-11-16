@@ -654,6 +654,7 @@ export const documentsRelations = relations(documents, ({ one, many }) => ({
   }),
   tagAssignments: many(documentTagAssignments),
   permissions: many(documentPermissions),
+  versions: many(documentVersions),
 }))
 
 // Folders Relations
@@ -760,6 +761,18 @@ export const documentPermissionsRelations = relations(documentPermissions, ({ on
   }),
   grantedByUser: one(users, {
     fields: [documentPermissions.grantedBy],
+    references: [users.id],
+  }),
+}))
+
+// Document Versions Relations
+export const documentVersionsRelations = relations(documentVersions, ({ one }) => ({
+  document: one(documents, {
+    fields: [documentVersions.documentId],
+    references: [documents.id],
+  }),
+  createdByUser: one(users, {
+    fields: [documentVersions.createdBy],
     references: [users.id],
   }),
 }))
