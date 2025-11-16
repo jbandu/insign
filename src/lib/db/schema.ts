@@ -234,6 +234,25 @@ export const ssoProviders = pgTable(
   })
 )
 
+export const apiKeys = pgTable('api_keys', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: uuid('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  orgId: uuid('org_id')
+    .notNull()
+    .references(() => organizations.id, { onDelete: 'cascade' }),
+  name: text('name').notNull(),
+  keyHash: text('key_hash').notNull().unique(),
+  keyPrefix: text('key_prefix').notNull(), // First 8 chars for display
+  scopes: text('scopes').array().notNull(), // e.g., ['documents:read', 'documents:write']
+  expiresAt: timestamp('expires_at'),
+  lastUsedAt: timestamp('last_used_at'),
+  lastUsedIp: inet('last_used_ip'),
+  revokedAt: timestamp('revoked_at'),
+  createdAt: timestamp('created_at').defaultNow(),
+})
+
 // Document Management Tables
 
 export const folders = pgTable(
@@ -724,6 +743,7 @@ export const usersRelations = relations(users, ({ one, many }) => ({
     references: [roles.id],
   }),
   mfaMethods: many(mfaMethods),
+  apiKeys: many(apiKeys),
 }))
 
 // Organizations Relations
@@ -856,5 +876,17 @@ export const signatureTemplateFieldsRelations = relations(signatureTemplateField
   template: one(signatureTemplates, {
     fields: [signatureTemplateFields.templateId],
     references: [signatureTemplates.id],
+  }),
+}))
+
+// API Keys Relations
+export const apiKeysRelations = relations(apiKeys, ({ one }) => ({
+  user: one(users, {
+    fields: [apiKeys.userId],
+    references: [users.id],
+  }),
+  organization: one(organizations, {
+    fields: [apiKeys.orgId],
+    references: [organizations.id],
   }),
 }))
