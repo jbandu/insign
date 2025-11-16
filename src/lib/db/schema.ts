@@ -671,7 +671,7 @@ export const foldersRelations = relations(folders, ({ one, many }) => ({
 }))
 
 // Users Relations
-export const usersRelations = relations(users, ({ one }) => ({
+export const usersRelations = relations(users, ({ one, many }) => ({
   organization: one(organizations, {
     fields: [users.orgId],
     references: [organizations.id],
@@ -680,6 +680,7 @@ export const usersRelations = relations(users, ({ one }) => ({
     fields: [users.roleId],
     references: [roles.id],
   }),
+  mfaMethods: many(mfaMethods),
 }))
 
 // Organizations Relations
@@ -773,6 +774,14 @@ export const documentVersionsRelations = relations(documentVersions, ({ one }) =
   }),
   createdByUser: one(users, {
     fields: [documentVersions.createdBy],
+    references: [users.id],
+  }),
+}))
+
+// MFA Methods Relations
+export const mfaMethodsRelations = relations(mfaMethods, ({ one }) => ({
+  user: one(users, {
+    fields: [mfaMethods.userId],
     references: [users.id],
   }),
 }))
