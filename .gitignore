@@ -30,8 +30,12 @@ node_modules/
 *.sln
 *.sw?
 
-# Supabase
-.supabase/
+# Next.js
+.next/
+out/
+
+# Drizzle
+drizzle/
 
 # Logs
 logs
