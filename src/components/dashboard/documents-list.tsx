@@ -13,7 +13,7 @@ interface Document {
   mimeType: string
   sizeBytes: number
   filePath: string
-  createdAt: Date
+  createdAt: Date | null
   folder?: {
     name: string
   } | null
@@ -120,7 +120,7 @@ export function DocumentsList({ documents }: DocumentsListProps) {
                 </Badge>
               </td>
               <td className="py-3 text-muted-foreground">
-                {new Date(doc.createdAt).toLocaleDateString()}
+                {doc.createdAt ? new Date(doc.createdAt).toLocaleDateString() : 'N/A'}
               </td>
               <td className="py-3">
                 <div className="flex items-center justify-end gap-2">

@@ -11,7 +11,7 @@ interface Folder {
   name: string
   path: string
   description: string | null
-  createdAt: Date
+  createdAt: Date | null
 }
 
 interface FoldersListProps {
@@ -75,7 +75,7 @@ export function FoldersList({ folders }: FoldersListProps) {
           </div>
 
           <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">
-            <span>{new Date(folder.createdAt).toLocaleDateString()}</span>
+            <span>{folder.createdAt ? new Date(folder.createdAt).toLocaleDateString() : 'N/A'}</span>
             <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
               <Button
                 variant="ghost"

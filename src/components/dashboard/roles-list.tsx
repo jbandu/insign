@@ -11,8 +11,8 @@ interface Role {
   id: string
   name: string
   description: string | null
-  isSystem: boolean
-  createdAt: Date
+  isSystem: boolean | null
+  createdAt: Date | null
 }
 
 interface RolesListProps {
@@ -82,7 +82,7 @@ export function RolesList({ roles }: RolesListProps) {
           {!role.isSystem && (
             <div className="mt-4 flex items-center justify-between">
               <span className="text-xs text-muted-foreground">
-                Created {new Date(role.createdAt).toLocaleDateString()}
+                Created {role.createdAt ? new Date(role.createdAt).toLocaleDateString() : 'N/A'}
               </span>
               <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                 <Button
