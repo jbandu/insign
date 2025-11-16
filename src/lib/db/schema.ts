@@ -633,3 +633,82 @@ export const signatureAuditLogsRelations = relations(signatureAuditLogs, ({ one 
     references: [signatureParticipants.id],
   }),
 }))
+
+// Documents Relations
+export const documentsRelations = relations(documents, ({ one }) => ({
+  organization: one(organizations, {
+    fields: [documents.orgId],
+    references: [organizations.id],
+  }),
+  folder: one(folders, {
+    fields: [documents.folderId],
+    references: [folders.id],
+  }),
+  createdByUser: one(users, {
+    fields: [documents.createdBy],
+    references: [users.id],
+  }),
+  updatedByUser: one(users, {
+    fields: [documents.updatedBy],
+    references: [users.id],
+  }),
+}))
+
+// Folders Relations
+export const foldersRelations = relations(folders, ({ one, many }) => ({
+  organization: one(organizations, {
+    fields: [folders.orgId],
+    references: [organizations.id],
+  }),
+  parent: one(folders, {
+    fields: [folders.parentId],
+    references: [folders.id],
+  }),
+  documents: many(documents),
+}))
+
+// Users Relations
+export const usersRelations = relations(users, ({ one }) => ({
+  organization: one(organizations, {
+    fields: [users.orgId],
+    references: [organizations.id],
+  }),
+  role: one(roles, {
+    fields: [users.roleId],
+    references: [roles.id],
+  }),
+}))
+
+// Organizations Relations
+export const organizationsRelations = relations(organizations, ({ many }) => ({
+  users: many(users),
+  documents: many(documents),
+  folders: many(folders),
+}))
+
+// Roles Relations
+export const rolesRelations = relations(roles, ({ one, many }) => ({
+  organization: one(organizations, {
+    fields: [roles.orgId],
+    references: [organizations.id],
+  }),
+  users: many(users),
+  permissions: many(rolePermissions),
+}))
+
+// Role Permissions Relations
+export const rolePermissionsRelations = relations(rolePermissions, ({ one }) => ({
+  role: one(roles, {
+    fields: [rolePermissions.roleId],
+    references: [roles.id],
+  }),
+  permission: one(permissions, {
+    fields: [rolePermissions.permissionId],
+    references: [permissions.id],
+  }),
+}))
+
+// Permissions Relations
+export const permissionsRelations = relations(permissions, ({ many }) => ({
+  roles: many(rolePermissions),
+}))
