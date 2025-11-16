@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { createSignature, completeSignature, declineSignature } from '@/app/actions/sign'
-import { CheckCircle2, XCircle, Loader2, Pencil, Type, Trash2 } from 'lucide-react'
+import { CheckCircle2, XCircle, Loader2, Pencil, Type, Trash2, FileText, ArrowLeft, ArrowRight } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -18,6 +18,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { Document, Page, pdfjs } from 'react-pdf'
+import { cn } from '@/lib/utils'
+
+// Configure PDF.js worker
+if (typeof window !== 'undefined') {
+  pdfjs.GlobalWorkerOptions.workerSrc = '/pdf-worker/pdf.worker.min.mjs'
+}
 
 interface Document {
   id: string
@@ -75,6 +82,9 @@ export function SignatureCanvas({
   const [typedSignature, setTypedSignature] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [numPages, setNumPages] = useState<number>(0)
+  const [currentPage, setCurrentPage] = useState(1)
+  const pdfWidth = 800
 
   const requiredFields = fields.filter(f => f.required)
   const completedFields = fields.filter(f =>
@@ -234,15 +244,9 @@ export function SignatureCanvas({
 
   return (
     <>
+      {/* Progress Card */}
       <Card>
-        <CardHeader>
-          <CardTitle>Signature Fields</CardTitle>
-          <CardDescription>
-            Complete {requiredFields.length} required field{requiredFields.length !== 1 ? 's' : ''}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Progress */}
+        <CardContent className="pt-6">
           <div className="flex items-center gap-2">
             <div className="flex-1 bg-gray-200 rounded-full h-2">
               <div
@@ -253,87 +257,169 @@ export function SignatureCanvas({
               />
             </div>
             <span className="text-sm font-medium">
-              {completedFields.length}/{requiredFields.length}
+              {completedFields.length}/{requiredFields.length} Signed
             </span>
           </div>
+        </CardContent>
+      </Card>
 
-          {/* Fields List */}
-          <div className="space-y-3">
-            {fields.map((field, index) => {
-              const isSigned = signatures.some(s => s.fieldId === field.id)
-              const signature = signatures.find(s => s.fieldId === field.id)
-
-              return (
-                <div
-                  key={field.id}
-                  className="flex items-center justify-between p-4 border rounded-lg"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary font-semibold text-sm">
-                      {index + 1}
+      {/* Document with Signature Fields */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Document & Signature Fields</CardTitle>
+          <CardDescription>
+            Click on the highlighted fields to add your signature
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {document.filePath ? (
+            <div className="space-y-4">
+              <Document
+                file={{ url: document.filePath }}
+                onLoadSuccess={({ numPages }) => setNumPages(numPages)}
+                onLoadError={(error) => {
+                  console.error('PDF load error:', error)
+                  setError('Failed to load document')
+                }}
+                loading={
+                  <div className="flex items-center justify-center min-h-[600px] border-2 border-dashed rounded-lg bg-gray-50">
+                    <div className="text-center">
+                      <Loader2 className="h-8 w-8 animate-spin text-muted-foreground mx-auto mb-2" />
+                      <p className="text-sm text-muted-foreground">Loading document...</p>
                     </div>
-                    <div>
-                      <p className="font-medium">
-                        {getFieldLabel(field.type)}
-                        {field.required && (
-                          <span className="text-destructive ml-1">*</span>
+                  </div>
+                }
+                error={
+                  <div className="flex items-center justify-center min-h-[600px] border-2 border-dashed rounded-lg bg-red-50">
+                    <div className="text-center text-red-600">
+                      <FileText className="h-12 w-12 mx-auto mb-2" />
+                      <p className="font-semibold">Failed to load document</p>
+                      <p className="text-sm mt-1">Please try refreshing the page</p>
+                    </div>
+                  </div>
+                }
+                options={{
+                  cMapUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/cmaps/`,
+                  cMapPacked: true,
+                  standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/standard_fonts/`,
+                }}
+              >
+                <div className="relative inline-block">
+                  <Page
+                    key={`page-${currentPage}`}
+                    pageNumber={currentPage}
+                    width={pdfWidth}
+                    renderTextLayer={false}
+                    renderAnnotationLayer={false}
+                  />
+
+                  {/* Render Signature Fields on current page */}
+                  {fields.filter(f => f.pageNumber === currentPage).map((field) => {
+                    const isSigned = signatures.some(s => s.fieldId === field.id)
+                    const signature = signatures.find(s => s.fieldId === field.id)
+
+                    return (
+                      <div
+                        key={field.id}
+                        className={cn(
+                          'absolute border-2 rounded flex items-center justify-center cursor-pointer transition-all',
+                          isSigned
+                            ? 'border-green-500 bg-green-50 hover:bg-green-100'
+                            : 'border-blue-500 bg-blue-50 hover:bg-blue-100 animate-pulse'
                         )}
-                      </p>
-                      {isSigned && signature && (
-                        <p className="text-xs text-muted-foreground">
-                          Signed as {signature.signatureType}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {isSigned ? (
-                      <Badge variant="default" className="bg-green-600">
-                        <CheckCircle2 className="h-3 w-3 mr-1" />
-                        Completed
-                      </Badge>
-                    ) : (
-                      <Button
-                        onClick={() => {
-                          setSelectedField(field)
-                          setIsSignatureDialogOpen(true)
+                        style={{
+                          left: `${field.x}px`,
+                          top: `${field.y}px`,
+                          width: `${field.width}px`,
+                          height: `${field.height}px`,
                         }}
-                        size="sm"
+                        onClick={() => {
+                          if (!isSigned) {
+                            setSelectedField(field)
+                            setIsSignatureDialogOpen(true)
+                          }
+                        }}
                       >
-                        <Pencil className="h-4 w-4 mr-2" />
-                        Sign
-                      </Button>
-                    )}
-                  </div>
+                        {isSigned && signature ? (
+                          signature.signatureType === 'drawn' ? (
+                            <img
+                              src={signature.signatureData}
+                              alt="Signature"
+                              className="w-full h-full object-contain p-1"
+                            />
+                          ) : (
+                            <span className="font-serif text-xl px-2 truncate">
+                              {signature.signatureData}
+                            </span>
+                          )
+                        ) : (
+                          <span className="text-xs font-medium text-blue-700">
+                            Click to sign
+                          </span>
+                        )}
+                      </div>
+                    )
+                  })}
                 </div>
-              )
-            })}
-          </div>
+              </Document>
 
-          {/* Document Preview */}
-          {document.filePath && (
-            <div className="pt-4 border-t">
-              <Button variant="outline" asChild className="w-full">
-                <a href={document.filePath} target="_blank" rel="noopener noreferrer">
-                  View Full Document
-                </a>
-              </Button>
+              {/* Page Navigation */}
+              {numPages > 1 && (
+                <div className="flex items-center justify-center gap-4 p-3 bg-gray-50 rounded-lg">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                    disabled={currentPage <= 1}
+                  >
+                    <ArrowLeft className="h-4 w-4" />
+                  </Button>
+                  <span className="text-sm font-medium">
+                    Page {currentPage} of {numPages}
+                  </span>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(p => Math.min(numPages, p + 1))}
+                    disabled={currentPage >= numPages}
+                  >
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-2" />
+              <p className="text-sm text-muted-foreground">No document available</p>
             </div>
           )}
 
-          {/* Error Message */}
-          {error && (
+        </CardContent>
+      </Card>
+
+      {/* Error Message */}
+      {error && (
+        <Card className="border-destructive">
+          <CardContent className="pt-6">
             <div className="p-3 bg-destructive/10 text-destructive text-sm rounded-lg">
               {error}
             </div>
-          )}
+          </CardContent>
+        </Card>
+      )}
 
-          {/* Action Buttons */}
-          <div className="flex gap-3 pt-4 border-t">
+      {/* Action Buttons */}
+      <Card>
+        <CardContent className="pt-6">
+          <div className="flex gap-3">
             <Button
               onClick={handleComplete}
               disabled={isLoading || completedFields.length < requiredFields.length}
               className="flex-1"
+              size="lg"
             >
               {isLoading ? (
                 <>
@@ -351,6 +437,7 @@ export function SignatureCanvas({
               onClick={handleDecline}
               variant="destructive"
               disabled={isLoading}
+              size="lg"
             >
               <XCircle className="h-4 w-4 mr-2" />
               Decline
