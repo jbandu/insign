@@ -556,3 +556,74 @@ export const verificationTokens = pgTable(
     pk: { columns: [table.identifier, table.token] },
   })
 )
+
+// Webhooks Table
+export const webhooks = pgTable('webhooks', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  orgId: uuid('org_id')
+    .notNull()
+    .references(() => organizations.id, { onDelete: 'cascade' }),
+  url: text('url').notNull(),
+  events: text('events').array().notNull(),
+  description: text('description'),
+  secret: text('secret').notNull(),
+  isActive: boolean('is_active').default(true),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+})
+
+// Relations
+export const signatureRequestsRelations = relations(signatureRequests, ({ one, many }) => ({
+  organization: one(organizations, {
+    fields: [signatureRequests.orgId],
+    references: [organizations.id],
+  }),
+  document: one(documents, {
+    fields: [signatureRequests.documentId],
+    references: [documents.id],
+  }),
+  participants: many(signatureParticipants),
+  fields: many(signatureFields),
+  auditLogs: many(signatureAuditLogs),
+}))
+
+export const signatureParticipantsRelations = relations(signatureParticipants, ({ one, many }) => ({
+  request: one(signatureRequests, {
+    fields: [signatureParticipants.requestId],
+    references: [signatureRequests.id],
+  }),
+  user: one(users, {
+    fields: [signatureParticipants.userId],
+    references: [users.id],
+  }),
+  signatures: many(signatures),
+}))
+
+export const signatureFieldsRelations = relations(signatureFields, ({ one }) => ({
+  request: one(signatureRequests, {
+    fields: [signatureFields.requestId],
+    references: [signatureRequests.id],
+  }),
+}))
+
+export const signaturesRelations = relations(signatures, ({ one }) => ({
+  participant: one(signatureParticipants, {
+    fields: [signatures.participantId],
+    references: [signatureParticipants.id],
+  }),
+  field: one(signatureFields, {
+    fields: [signatures.fieldId],
+    references: [signatureFields.id],
+  }),
+}))
+
+export const signatureAuditLogsRelations = relations(signatureAuditLogs, ({ one }) => ({
+  request: one(signatureRequests, {
+    fields: [signatureAuditLogs.requestId],
+    references: [signatureRequests.id],
+  }),
+  participant: one(signatureParticipants, {
+    fields: [signatureAuditLogs.participantId],
+    references: [signatureParticipants.id],
+  }),
+}))
