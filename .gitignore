@@ -64,3 +64,6 @@ Thumbs.db
 # Build outputs
 *.tsbuildinfo
 .cache/
+
+# Auto-generated PDF.js worker (copied via postinstall script)
+/public/pdf-worker/

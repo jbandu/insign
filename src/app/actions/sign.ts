@@ -42,7 +42,12 @@ export async function getSigningSession(accessToken: string) {
 
     // Check if request is active
     if (!participant.request.status || !['sent', 'in_progress'].includes(participant.request.status)) {
-      return { success: false, error: 'This signature request is no longer active' }
+      const statusMessage = participant.request.status === 'declined'
+        ? 'This signature request has been declined'
+        : participant.request.status === 'completed'
+        ? 'This signature request has already been completed'
+        : 'This signature request is no longer active'
+      return { success: false, error: statusMessage }
     }
 
     // Check if expired
