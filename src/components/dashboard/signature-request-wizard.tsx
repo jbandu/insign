@@ -565,22 +565,35 @@ export function SignatureRequestWizard({ documents }: SignatureRequestWizardProp
                   {/* PDF Renderer */}
                   {selectedDocument?.filePath ? (
                     <Document
-                      file={selectedDocument.filePath}
+                      file={{ url: selectedDocument.filePath }}
                       onLoadSuccess={({ numPages }) => setNumPages(numPages)}
+                      onLoadError={(error) => {
+                        console.error('PDF load error:', error)
+                        setError(`Failed to load PDF: ${error.message}`)
+                      }}
                       loading={
                         <div className="flex items-center justify-center min-h-[800px] border-2 border-dashed rounded-lg bg-gray-50">
-                          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                        </div>
-                      }
-                      error={
-                        <div className="flex items-center justify-center min-h-[800px] border-2 border-dashed rounded-lg bg-gray-50">
-                          <div className="text-center text-muted-foreground">
-                            <FileText className="h-12 w-12 mx-auto mb-2" />
-                            <p>Failed to load PDF</p>
-                            <p className="text-sm mt-1">Click on the area below to place fields</p>
+                          <div className="text-center">
+                            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground mx-auto mb-2" />
+                            <p className="text-sm text-muted-foreground">Loading PDF...</p>
                           </div>
                         </div>
                       }
+                      error={
+                        <div className="flex items-center justify-center min-h-[800px] border-2 border-dashed rounded-lg bg-red-50">
+                          <div className="text-center text-red-600">
+                            <FileText className="h-12 w-12 mx-auto mb-2" />
+                            <p className="font-semibold">Failed to load PDF</p>
+                            <p className="text-sm mt-1">Please check the document file</p>
+                            {error && <p className="text-xs mt-2 max-w-md">{error}</p>}
+                          </div>
+                        </div>
+                      }
+                      options={{
+                        cMapUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/cmaps/`,
+                        cMapPacked: true,
+                        standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/standard_fonts/`,
+                      }}
                     >
                       <div
                         className="relative cursor-crosshair inline-block"
@@ -589,8 +602,11 @@ export function SignatureRequestWizard({ documents }: SignatureRequestWizardProp
                         <Page
                           pageNumber={currentPage}
                           width={pdfWidth}
-                          renderTextLayer={true}
-                          renderAnnotationLayer={true}
+                          renderTextLayer={false}
+                          renderAnnotationLayer={false}
+                          onLoadError={(error) => {
+                            console.error('Page load error:', error)
+                          }}
                         />
 
                         {/* Render Placed Fields (only for current page) */}
