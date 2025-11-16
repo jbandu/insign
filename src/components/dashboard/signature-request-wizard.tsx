@@ -618,6 +618,7 @@ export function SignatureRequestWizard({ documents }: SignatureRequestWizardProp
                         onClick={handleDocumentClick}
                       >
                         <Page
+                          key={`page-${currentPage}`}
                           pageNumber={currentPage}
                           width={pdfWidth}
                           renderTextLayer={false}

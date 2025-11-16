@@ -167,7 +167,8 @@ export function SignatureCanvas({
       fieldId: selectedField.id,
       signatureData,
       signatureType: signatureMode === 'draw' ? 'drawn' : 'typed',
-      ipAddress: window.location.hostname,
+      // ipAddress is optional and will default to '0.0.0.0' on server
+      // We can't reliably get client IP from browser due to proxies/CDN
     })
 
     if (result.success && result.data) {
@@ -210,7 +211,9 @@ export function SignatureCanvas({
     const result = await declineSignature(accessToken)
 
     if (result.success) {
-      router.refresh()
+      // Redirect to a declined confirmation page instead of refreshing
+      // which would cause "no longer active" error
+      router.push('/sign/declined')
     } else {
       setError(result.error || 'Failed to decline signature')
     }
