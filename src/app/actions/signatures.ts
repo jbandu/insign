@@ -274,8 +274,10 @@ export async function sendSignatureRequest(requestId: string) {
       const signingUrl = `${baseUrl}/sign/${participant.accessToken}`
 
       const emailHtml = generateSignatureRequestEmail({
-        recipientName: participant.fullName,
-        senderName: currentUser.fullName || currentUser.email,
+        recipientName: participant.fullName || participant.email,
+        senderName: currentUser.firstName && currentUser.lastName
+          ? `${currentUser.firstName} ${currentUser.lastName}`
+          : currentUser.email,
         documentName: request.document.name,
         requestTitle: request.title,
         message: request.message || undefined,

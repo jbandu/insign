@@ -2,7 +2,7 @@
 
 import { db } from '@/lib/db'
 import { signatures, signatureParticipants, signatureRequests, signatureFields, signatureAuditLogs, users } from '@/lib/db/schema'
-import { eq, and } from 'drizzle-orm'
+import { eq, and, asc } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { sendEmail, generateSignatureRequestEmail, generateSignatureCompletedEmail, generateAllSignaturesCompletedEmail } from '@/lib/email'
@@ -28,7 +28,7 @@ export async function getSigningSession(accessToken: string) {
           with: {
             document: true,
             participants: {
-              orderBy: (participants, { asc }) => [asc(participants.orderIndex)],
+              orderBy: asc(signatureParticipants.orderIndex),
             },
             fields: true,
           },
@@ -41,7 +41,7 @@ export async function getSigningSession(accessToken: string) {
     }
 
     // Check if request is active
-    if (!['sent', 'in_progress'].includes(participant.request.status)) {
+    if (!participant.request.status || !['sent', 'in_progress'].includes(participant.request.status)) {
       return { success: false, error: 'This signature request is no longer active' }
     }
 
@@ -51,7 +51,7 @@ export async function getSigningSession(accessToken: string) {
     }
 
     // Check if participant already signed
-    if (participant.status === 'signed' || participant.status === 'completed') {
+    if (participant.status === 'signed') {
       return { success: false, error: 'You have already signed this document' }
     }
 
@@ -61,7 +61,7 @@ export async function getSigningSession(accessToken: string) {
         p => p.orderIndex < participant.orderIndex
       )
       const allPreviousSigned = previousParticipants.every(
-        p => p.status === 'signed' || p.status === 'completed'
+        p => p.status === 'signed'
       )
       if (!allPreviousSigned) {
         return { success: false, error: 'Please wait for previous participants to sign' }
@@ -125,12 +125,11 @@ export async function createSignature(input: SignatureInput) {
     const [newSignature] = await db
       .insert(signatures)
       .values({
-        requestId: participant.requestId,
         participantId: participant.id,
         fieldId: validatedData.fieldId,
         signatureData: validatedData.signatureData,
         signatureType: validatedData.signatureType,
-        ipAddress: validatedData.ipAddress,
+        ipAddress: validatedData.ipAddress || '0.0.0.0',
       })
       .returning()
 
@@ -164,7 +163,7 @@ export async function completeSignature(accessToken: string) {
           with: {
             document: true,
             participants: {
-              orderBy: (participants, { asc }) => [asc(participants.orderIndex)],
+              orderBy: asc(signatureParticipants.orderIndex),
             },
           },
         },
@@ -179,17 +178,17 @@ export async function completeSignature(accessToken: string) {
     const requiredFields = await db.query.signatureFields.findMany({
       where: and(
         eq(signatureFields.participantId, participant.id),
-        eq(signatureFields.isRequired, true)
+        eq(signatureFields.required, true)
       ),
     })
 
     // Check if all required fields are signed
-    const signatures = await db.query.signatures.findMany({
+    const existingSignatures = await db.query.signatures.findMany({
       where: eq(signatures.participantId, participant.id),
     })
 
     const allRequiredSigned = requiredFields.every(field =>
-      signatures.some(sig => sig.fieldId === field.id)
+      existingSignatures.some(sig => sig.fieldId === field.id)
     )
 
     if (!allRequiredSigned) {
@@ -218,7 +217,7 @@ export async function completeSignature(accessToken: string) {
     // Check if all participants have signed
     const allParticipants = participant.request.participants
     const allSigned = allParticipants.every(p =>
-      p.id === participant.id ? true : ['signed', 'completed'].includes(p.status)
+      p.id === participant.id ? true : p.status === 'signed'
     )
 
     if (allSigned) {
@@ -250,7 +249,9 @@ export async function completeSignature(accessToken: string) {
         const dashboardUrl = `${baseUrl}/dashboard/signatures/${participant.requestId}`
 
         const emailHtml = generateAllSignaturesCompletedEmail({
-          recipientName: creator.fullName || creator.email,
+          recipientName: creator.firstName && creator.lastName
+            ? `${creator.firstName} ${creator.lastName}`
+            : creator.email,
           documentName: participant.request.document.name,
           requestTitle: participant.request.title,
           participantCount: allParticipants.length,
@@ -269,10 +270,10 @@ export async function completeSignature(accessToken: string) {
       for (const otherParticipant of allParticipants) {
         if (otherParticipant.id !== participant.id) {
           const emailHtml = generateSignatureCompletedEmail({
-            recipientName: otherParticipant.fullName,
+            recipientName: otherParticipant.fullName || otherParticipant.email,
             documentName: participant.request.document.name,
             requestTitle: participant.request.title,
-            signerName: participant.fullName,
+            signerName: participant.fullName || participant.email,
             completedAt: new Date(),
           })
 
@@ -333,8 +334,10 @@ export async function completeSignature(accessToken: string) {
         const signingUrl = `${baseUrl}/sign/${nextParticipant.accessToken}`
 
         const emailHtml = generateSignatureRequestEmail({
-          recipientName: nextParticipant.fullName,
-          senderName: creator?.fullName || creator?.email || 'Insign',
+          recipientName: nextParticipant.fullName || nextParticipant.email,
+          senderName: creator?.firstName && creator?.lastName
+            ? `${creator.firstName} ${creator.lastName}`
+            : creator?.email || 'Insign',
           documentName: participant.request.document.name,
           requestTitle: participant.request.title,
           message: participant.request.message || undefined,

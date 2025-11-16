@@ -14,7 +14,7 @@ interface SignPageProps {
 export default async function SignPage({ params }: SignPageProps) {
   const result = await getSigningSession(params.token)
 
-  if (!result.success) {
+  if (!result.success || !result.data) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
         <Card className="max-w-md w-full">
@@ -35,7 +35,7 @@ export default async function SignPage({ params }: SignPageProps) {
   const { participant, request, fields, existingSignatures } = result.data
 
   // Check if already completed
-  if (participant.status === 'signed' || participant.status === 'completed') {
+  if (participant.status === 'signed') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
         <Card className="max-w-md w-full">
@@ -82,7 +82,7 @@ export default async function SignPage({ params }: SignPageProps) {
               </div>
               <div>
                 <p className="text-sm font-medium">Your Name</p>
-                <p className="text-sm text-muted-foreground">{participant.fullName}</p>
+                <p className="text-sm text-muted-foreground">{participant.fullName || participant.email}</p>
               </div>
               <div>
                 <p className="text-sm font-medium">Your Email</p>

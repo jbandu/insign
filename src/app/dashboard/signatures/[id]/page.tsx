@@ -43,6 +43,10 @@ export default async function SignatureRequestDetailPage({ params }: SignatureRe
 
   const request = result.data
 
+  if (!request) {
+    notFound()
+  }
+
   // Get audit logs
   const auditResult = await getAuditLogs(params.id)
   const auditLogs = auditResult.success ? auditResult.data || [] : []
@@ -59,7 +63,7 @@ export default async function SignatureRequestDetailPage({ params }: SignatureRe
 
   const getParticipantStatusIcon = (status: string) => {
     switch (status) {
-      case 'completed': case 'signed': return <CheckCircle2 className="h-4 w-4 text-green-600" />
+      case 'signed': return <CheckCircle2 className="h-4 w-4 text-green-600" />
       case 'pending': return <Clock className="h-4 w-4 text-gray-400" />
       case 'notified': return <Mail className="h-4 w-4 text-blue-600" />
       case 'declined': return <XCircle className="h-4 w-4 text-red-600" />
@@ -68,7 +72,7 @@ export default async function SignatureRequestDetailPage({ params }: SignatureRe
   }
 
   const completedParticipants = request.participants.filter(p =>
-    p.status === 'completed' || p.status === 'signed'
+    p.status === 'signed'
   ).length
 
   return (
@@ -108,8 +112,8 @@ export default async function SignatureRequestDetailPage({ params }: SignatureRe
             <CardTitle className="text-sm font-medium">Status</CardTitle>
           </CardHeader>
           <CardContent>
-            <Badge variant={getStatusColor(request.status) as any} className="text-sm">
-              {request.status.replace('_', ' ').toUpperCase()}
+            <Badge variant={getStatusColor(request.status || 'draft') as any} className="text-sm">
+              {(request.status || 'draft').replace('_', ' ').toUpperCase()}
             </Badge>
           </CardContent>
         </Card>
@@ -151,10 +155,10 @@ export default async function SignatureRequestDetailPage({ params }: SignatureRe
           </CardHeader>
           <CardContent>
             <div className="text-sm font-medium">
-              {new Date(request.createdAt).toLocaleDateString()}
+              {request.createdAt ? new Date(request.createdAt).toLocaleDateString() : 'N/A'}
             </div>
             <p className="text-xs text-muted-foreground">
-              {new Date(request.createdAt).toLocaleTimeString()}
+              {request.createdAt ? new Date(request.createdAt).toLocaleTimeString() : 'N/A'}
             </p>
           </CardContent>
         </Card>
@@ -173,12 +177,12 @@ export default async function SignatureRequestDetailPage({ params }: SignatureRe
             <div>
               <p className="text-sm font-medium">{request.document.name}</p>
               <p className="text-xs text-muted-foreground mt-1">
-                {(request.document.fileSize / 1024 / 1024).toFixed(2)} MB
+                {(request.document.sizeBytes / 1024 / 1024).toFixed(2)} MB
               </p>
             </div>
-            {request.document.blobUrl && (
+            {request.document.filePath && (
               <Button asChild variant="outline" size="sm">
-                <a href={request.document.blobUrl} target="_blank" rel="noopener noreferrer">
+                <a href={request.document.filePath} target="_blank" rel="noopener noreferrer">
                   View Document
                 </a>
               </Button>
@@ -242,9 +246,9 @@ export default async function SignatureRequestDetailPage({ params }: SignatureRe
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  {getParticipantStatusIcon(participant.status)}
-                  <Badge variant={getStatusColor(participant.status) as any}>
-                    {participant.status}
+                  {getParticipantStatusIcon(participant.status || 'pending')}
+                  <Badge variant={getStatusColor(participant.status || 'pending') as any}>
+                    {participant.status || 'pending'}
                   </Badge>
                 </div>
               </div>
@@ -268,14 +272,14 @@ export default async function SignatureRequestDetailPage({ params }: SignatureRe
                 <div key={field.id} className="flex items-center justify-between p-3 border rounded">
                   <div>
                     <p className="font-medium text-sm">
-                      {field.fieldType.replace('_', ' ').toUpperCase()}
+                      {field.type.replace('_', ' ').toUpperCase()}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      Page {field.pageNumber} - Position: ({field.positionX}, {field.positionY})
+                      Page {field.pageNumber} - Position: ({field.x}, {field.y})
                     </p>
                   </div>
                   <Badge variant="outline" className="text-xs">
-                    {field.isRequired ? 'Required' : 'Optional'}
+                    {field.required ? 'Required' : 'Optional'}
                   </Badge>
                 </div>
               ))}

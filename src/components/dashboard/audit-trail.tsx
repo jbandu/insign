@@ -17,7 +17,7 @@ import {
 interface AuditLog {
   id: string
   action: string
-  timestamp: Date
+  timestamp: Date | null
   participantId: string | null
   metadata: any
 }
@@ -148,7 +148,7 @@ export function AuditTrail({ logs }: AuditTrailProps) {
                     {getActionLabel(log.action)}
                   </Badge>
                   <span className="text-xs text-muted-foreground">
-                    {new Date(log.timestamp).toLocaleString()}
+                    {log.timestamp ? new Date(log.timestamp).toLocaleString() : 'N/A'}
                   </span>
                 </div>
                 <p className="text-sm text-foreground">

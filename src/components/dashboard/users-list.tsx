@@ -11,8 +11,8 @@ interface User {
   email: string
   firstName: string | null
   lastName: string | null
-  status: string
-  createdAt: Date
+  status: string | null
+  createdAt: Date | null
   role?: {
     name: string
   } | null
@@ -85,11 +85,11 @@ export function UsersList({ users }: UsersListProps) {
                       : 'bg-gray-50 text-gray-700'
                   }`}
                 >
-                  {user.status}
+                  {user.status || 'N/A'}
                 </span>
               </td>
               <td className="py-3 text-muted-foreground">
-                {new Date(user.createdAt).toLocaleDateString()}
+                {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}
               </td>
               <td className="py-3">
                 <div className="flex items-center justify-end gap-2">

@@ -156,7 +156,7 @@ export default async function ReportsPage() {
                       <div>
                         <p className="text-sm font-medium">{doc.name}</p>
                         <p className="text-xs text-muted-foreground">
-                          {new Date(doc.createdAt).toLocaleDateString()}
+                          {doc.createdAt ? new Date(doc.createdAt).toLocaleDateString() : 'N/A'}
                         </p>
                       </div>
                     </div>

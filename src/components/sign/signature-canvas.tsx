@@ -22,18 +22,18 @@ import {
 interface Document {
   id: string
   name: string
-  blobUrl: string | null
+  filePath: string
 }
 
 interface SignatureField {
   id: string
-  fieldType: string
+  type: string
   pageNumber: number
-  positionX: number
-  positionY: number
+  x: number
+  y: number
   width: number
   height: number
-  isRequired: boolean
+  required: boolean | null
 }
 
 interface Signature {
@@ -45,7 +45,7 @@ interface Signature {
 
 interface Participant {
   id: string
-  fullName: string
+  fullName: string | null
   email: string
   role: string
 }
@@ -76,7 +76,7 @@ export function SignatureCanvas({
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const requiredFields = fields.filter(f => f.isRequired)
+  const requiredFields = fields.filter(f => f.required)
   const completedFields = fields.filter(f =>
     signatures.some(s => s.fieldId === f.id)
   )
@@ -271,8 +271,8 @@ export function SignatureCanvas({
                     </div>
                     <div>
                       <p className="font-medium">
-                        {getFieldLabel(field.fieldType)}
-                        {field.isRequired && (
+                        {getFieldLabel(field.type)}
+                        {field.required && (
                           <span className="text-destructive ml-1">*</span>
                         )}
                       </p>
@@ -308,10 +308,10 @@ export function SignatureCanvas({
           </div>
 
           {/* Document Preview */}
-          {document.blobUrl && (
+          {document.filePath && (
             <div className="pt-4 border-t">
               <Button variant="outline" asChild className="w-full">
-                <a href={document.blobUrl} target="_blank" rel="noopener noreferrer">
+                <a href={document.filePath} target="_blank" rel="noopener noreferrer">
                   View Full Document
                 </a>
               </Button>
@@ -361,7 +361,7 @@ export function SignatureCanvas({
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>
-              {selectedField && getFieldLabel(selectedField.fieldType)}
+              {selectedField && getFieldLabel(selectedField.type)}
             </DialogTitle>
             <DialogDescription>
               Create your signature by drawing or typing
@@ -411,7 +411,7 @@ export function SignatureCanvas({
                   id="typed-signature"
                   value={typedSignature}
                   onChange={(e) => setTypedSignature(e.target.value)}
-                  placeholder={participant.fullName}
+                  placeholder={participant.fullName || participant.email}
                   className="text-2xl font-serif"
                 />
               </div>

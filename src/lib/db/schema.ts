@@ -135,8 +135,10 @@ export const users = pgTable(
     email: text('email').notNull(),
     emailVerified: timestamp('email_verified'),
     password: text('password'),
+    name: text('name'),
     firstName: text('first_name'),
     lastName: text('last_name'),
+    image: text('image'),
     avatarUrl: text('avatar_url'),
     roleId: uuid('role_id').references(() => roles.id),
     mfaEnabled: boolean('mfa_enabled').default(false),
@@ -527,18 +529,17 @@ export const accounts = pgTable('accounts', {
   type: text('type').notNull(),
   provider: text('provider').notNull(),
   providerAccountId: text('provider_account_id').notNull(),
-  refreshToken: text('refresh_token'),
-  accessToken: text('access_token'),
-  expiresAt: integer('expires_at'),
-  tokenType: text('token_type'),
+  refresh_token: text('refresh_token'),
+  access_token: text('access_token'),
+  expires_at: integer('expires_at'),
+  token_type: text('token_type'),
+  id_token: text('id_token'),
   scope: text('scope'),
-  idToken: text('id_token'),
-  sessionState: text('session_state'),
+  session_state: text('session_state'),
 })
 
 export const sessions = pgTable('sessions', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  sessionToken: text('session_token').notNull().unique(),
+  sessionToken: text('session_token').primaryKey(),
   userId: uuid('user_id')
     .notNull()
     .references(() => users.id, { onDelete: 'cascade' }),
@@ -556,3 +557,79 @@ export const verificationTokens = pgTable(
     pk: { columns: [table.identifier, table.token] },
   })
 )
+
+// Webhooks Table
+export const webhooks = pgTable('webhooks', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  orgId: uuid('org_id')
+    .notNull()
+    .references(() => organizations.id, { onDelete: 'cascade' }),
+  url: text('url').notNull(),
+  events: text('events').array().notNull(),
+  description: text('description'),
+  secret: text('secret').notNull(),
+  isActive: boolean('is_active').default(true),
+  lastTriggeredAt: timestamp('last_triggered_at'),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+})
+
+// Relations
+export const signatureRequestsRelations = relations(signatureRequests, ({ one, many }) => ({
+  organization: one(organizations, {
+    fields: [signatureRequests.orgId],
+    references: [organizations.id],
+  }),
+  document: one(documents, {
+    fields: [signatureRequests.documentId],
+    references: [documents.id],
+  }),
+  participants: many(signatureParticipants),
+  fields: many(signatureFields),
+  auditLogs: many(signatureAuditLogs),
+}))
+
+export const signatureParticipantsRelations = relations(signatureParticipants, ({ one, many }) => ({
+  request: one(signatureRequests, {
+    fields: [signatureParticipants.requestId],
+    references: [signatureRequests.id],
+  }),
+  user: one(users, {
+    fields: [signatureParticipants.userId],
+    references: [users.id],
+  }),
+  signatures: many(signatures),
+}))
+
+export const signatureFieldsRelations = relations(signatureFields, ({ one }) => ({
+  request: one(signatureRequests, {
+    fields: [signatureFields.requestId],
+    references: [signatureRequests.id],
+  }),
+  participant: one(signatureParticipants, {
+    fields: [signatureFields.participantId],
+    references: [signatureParticipants.id],
+  }),
+}))
+
+export const signaturesRelations = relations(signatures, ({ one }) => ({
+  participant: one(signatureParticipants, {
+    fields: [signatures.participantId],
+    references: [signatureParticipants.id],
+  }),
+  field: one(signatureFields, {
+    fields: [signatures.fieldId],
+    references: [signatureFields.id],
+  }),
+}))
+
+export const signatureAuditLogsRelations = relations(signatureAuditLogs, ({ one }) => ({
+  request: one(signatureRequests, {
+    fields: [signatureAuditLogs.requestId],
+    references: [signatureRequests.id],
+  }),
+  participant: one(signatureParticipants, {
+    fields: [signatureAuditLogs.participantId],
+    references: [signatureParticipants.id],
+  }),
+}))
