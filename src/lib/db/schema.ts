@@ -234,6 +234,25 @@ export const ssoProviders = pgTable(
   })
 )
 
+export const apiKeys = pgTable('api_keys', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: uuid('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  orgId: uuid('org_id')
+    .notNull()
+    .references(() => organizations.id, { onDelete: 'cascade' }),
+  name: text('name').notNull(),
+  keyHash: text('key_hash').notNull().unique(),
+  keyPrefix: text('key_prefix').notNull(), // First 8 chars for display
+  scopes: text('scopes').array().notNull(), // e.g., ['documents:read', 'documents:write']
+  expiresAt: timestamp('expires_at'),
+  lastUsedAt: timestamp('last_used_at'),
+  lastUsedIp: inet('last_used_ip'),
+  revokedAt: timestamp('revoked_at'),
+  createdAt: timestamp('created_at').defaultNow(),
+})
+
 // Document Management Tables
 
 export const folders = pgTable(
@@ -341,6 +360,49 @@ export const documentShares = pgTable('document_shares', {
     .references(() => users.id),
   createdAt: timestamp('created_at').defaultNow(),
   revokedAt: timestamp('revoked_at'),
+})
+
+export const signatureTemplates = pgTable('signature_templates', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  orgId: uuid('org_id')
+    .notNull()
+    .references(() => organizations.id, { onDelete: 'cascade' }),
+  name: text('name').notNull(),
+  description: text('description'),
+  workflowType: workflowTypeEnum('workflow_type').notNull().default('sequential'),
+  message: text('message'),
+  createdBy: uuid('created_by')
+    .notNull()
+    .references(() => users.id),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+})
+
+export const signatureTemplateParticipants = pgTable('signature_template_participants', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  templateId: uuid('template_id')
+    .notNull()
+    .references(() => signatureTemplates.id, { onDelete: 'cascade' }),
+  label: text('label').notNull(), // e.g., "Customer", "Manager", "HR"
+  role: participantRoleEnum('role').notNull().default('signer'),
+  order: integer('order').notNull().default(1),
+  createdAt: timestamp('created_at').defaultNow(),
+})
+
+export const signatureTemplateFields = pgTable('signature_template_fields', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  templateId: uuid('template_id')
+    .notNull()
+    .references(() => signatureTemplates.id, { onDelete: 'cascade' }),
+  participantLabel: text('participant_label').notNull(), // references participant.label
+  type: signatureFieldTypeEnum('type').notNull(),
+  pageNumber: integer('page_number').notNull().default(1),
+  x: real('x').notNull(),
+  y: real('y').notNull(),
+  width: real('width').notNull(),
+  height: real('height').notNull(),
+  required: boolean('required').default(true),
+  createdAt: timestamp('created_at').defaultNow(),
 })
 
 export const documentTags = pgTable(
@@ -635,7 +697,7 @@ export const signatureAuditLogsRelations = relations(signatureAuditLogs, ({ one 
 }))
 
 // Documents Relations
-export const documentsRelations = relations(documents, ({ one }) => ({
+export const documentsRelations = relations(documents, ({ one, many }) => ({
   organization: one(organizations, {
     fields: [documents.orgId],
     references: [organizations.id],
@@ -652,6 +714,9 @@ export const documentsRelations = relations(documents, ({ one }) => ({
     fields: [documents.updatedBy],
     references: [users.id],
   }),
+  tagAssignments: many(documentTagAssignments),
+  permissions: many(documentPermissions),
+  versions: many(documentVersions),
 }))
 
 // Folders Relations
@@ -668,7 +733,7 @@ export const foldersRelations = relations(folders, ({ one, many }) => ({
 }))
 
 // Users Relations
-export const usersRelations = relations(users, ({ one }) => ({
+export const usersRelations = relations(users, ({ one, many }) => ({
   organization: one(organizations, {
     fields: [users.orgId],
     references: [organizations.id],
@@ -677,6 +742,8 @@ export const usersRelations = relations(users, ({ one }) => ({
     fields: [users.roleId],
     references: [roles.id],
   }),
+  mfaMethods: many(mfaMethods),
+  apiKeys: many(apiKeys),
 }))
 
 // Organizations Relations
@@ -713,14 +780,113 @@ export const permissionsRelations = relations(permissions, ({ many }) => ({
   roles: many(rolePermissions),
 }))
 
-// Document Shares Relations
-export const documentSharesRelations = relations(documentShares, ({ one }) => ({
+// Document Tags Relations
+export const documentTagsRelations = relations(documentTags, ({ one, many }) => ({
+  organization: one(organizations, {
+    fields: [documentTags.orgId],
+    references: [organizations.id],
+  }),
+  createdByUser: one(users, {
+    fields: [documentTags.createdBy],
+    references: [users.id],
+  }),
+  documentAssignments: many(documentTagAssignments),
+}))
+
+// Document Tag Assignments Relations
+export const documentTagAssignmentsRelations = relations(documentTagAssignments, ({ one }) => ({
   document: one(documents, {
-    fields: [documentShares.documentId],
+    fields: [documentTagAssignments.documentId],
+    references: [documents.id],
+  }),
+  tag: one(documentTags, {
+    fields: [documentTagAssignments.tagId],
+    references: [documentTags.id],
+  }),
+  assignedByUser: one(users, {
+    fields: [documentTagAssignments.assignedBy],
+    references: [users.id],
+  }),
+}))
+
+// Document Permissions Relations
+export const documentPermissionsRelations = relations(documentPermissions, ({ one }) => ({
+  document: one(documents, {
+    fields: [documentPermissions.documentId],
+    references: [documents.id],
+  }),
+  user: one(users, {
+    fields: [documentPermissions.userId],
+    references: [users.id],
+  }),
+  role: one(roles, {
+    fields: [documentPermissions.roleId],
+    references: [roles.id],
+  }),
+  grantedByUser: one(users, {
+    fields: [documentPermissions.grantedBy],
+    references: [users.id],
+  }),
+}))
+
+// Document Versions Relations
+export const documentVersionsRelations = relations(documentVersions, ({ one }) => ({
+  document: one(documents, {
+    fields: [documentVersions.documentId],
     references: [documents.id],
   }),
   createdByUser: one(users, {
-    fields: [documentShares.createdBy],
+    fields: [documentVersions.createdBy],
     references: [users.id],
+  }),
+}))
+
+// MFA Methods Relations
+export const mfaMethodsRelations = relations(mfaMethods, ({ one }) => ({
+  user: one(users, {
+    fields: [mfaMethods.userId],
+    references: [users.id],
+  }),
+}))
+
+// Signature Templates Relations
+export const signatureTemplatesRelations = relations(signatureTemplates, ({ one, many }) => ({
+  organization: one(organizations, {
+    fields: [signatureTemplates.orgId],
+    references: [organizations.id],
+  }),
+  createdByUser: one(users, {
+    fields: [signatureTemplates.createdBy],
+    references: [users.id],
+  }),
+  participants: many(signatureTemplateParticipants),
+  fields: many(signatureTemplateFields),
+}))
+
+// Signature Template Participants Relations
+export const signatureTemplateParticipantsRelations = relations(signatureTemplateParticipants, ({ one }) => ({
+  template: one(signatureTemplates, {
+    fields: [signatureTemplateParticipants.templateId],
+    references: [signatureTemplates.id],
+  }),
+}))
+
+// Signature Template Fields Relations
+export const signatureTemplateFieldsRelations = relations(signatureTemplateFields, ({ one }) => ({
+  template: one(signatureTemplates, {
+    fields: [signatureTemplateFields.templateId],
+    references: [signatureTemplates.id],
+  }),
+}))
+
+// API Keys Relations
+export const apiKeysRelations = relations(apiKeys, ({ one }) => ({
+  user: one(users, {
+    fields: [apiKeys.userId],
+    references: [users.id],
+  }),
+  organization: one(organizations, {
+    fields: [apiKeys.orgId],
+    references: [organizations.id],
   }),
 }))

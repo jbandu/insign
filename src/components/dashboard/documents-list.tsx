@@ -3,10 +3,13 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { FileText, Download, Trash2, FolderOpen, File, Share2 } from 'lucide-react'
+import { FileText, Download, Trash2, FolderOpen, File, Shield, History } from 'lucide-react'
 import { deleteDocument } from '@/app/actions/documents'
 import { ShareDocumentDialog } from './share-document-dialog'
 import { useRouter } from 'next/navigation'
+import { DocumentTagSelector } from './document-tag-selector'
+import { ManagePermissionsDialog } from './manage-permissions-dialog'
+import { DocumentVersionHistory } from './document-version-history'
 
 interface Document {
   id: string
@@ -86,6 +89,7 @@ export function DocumentsList({ documents }: DocumentsListProps) {
         <thead className="border-b">
           <tr className="text-left text-sm text-muted-foreground">
             <th className="pb-3 font-medium">Name</th>
+            <th className="pb-3 font-medium">Tags</th>
             <th className="pb-3 font-medium">Size</th>
             <th className="pb-3 font-medium">Folder</th>
             <th className="pb-3 font-medium">Type</th>
@@ -101,6 +105,12 @@ export function DocumentsList({ documents }: DocumentsListProps) {
                   {getFileIcon(doc.mimeType)}
                   <span className="font-medium">{doc.name}</span>
                 </div>
+              </td>
+              <td className="py-3">
+                <DocumentTagSelector
+                  documentId={doc.id}
+                  onTagsChange={() => router.refresh()}
+                />
               </td>
               <td className="py-3 text-muted-foreground">
                 {formatFileSize(doc.sizeBytes)}
@@ -125,6 +135,16 @@ export function DocumentsList({ documents }: DocumentsListProps) {
               </td>
               <td className="py-3">
                 <div className="flex items-center justify-end gap-2">
+                  <DocumentVersionHistory documentId={doc.id} documentName={doc.name}>
+                    <Button variant="ghost" size="sm">
+                      <History className="h-4 w-4" />
+                    </Button>
+                  </DocumentVersionHistory>
+                  <ManagePermissionsDialog documentId={doc.id} documentName={doc.name}>
+                    <Button variant="ghost" size="sm">
+                      <Shield className="h-4 w-4" />
+                    </Button>
+                  </ManagePermissionsDialog>
                   <Button
                     variant="ghost"
                     size="sm"

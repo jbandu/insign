@@ -6,6 +6,7 @@ import { Upload } from 'lucide-react'
 import { DocumentsList } from '@/components/dashboard/documents-list'
 import { DocumentUpload } from '@/components/dashboard/document-upload'
 import { DocumentSearch } from '@/components/dashboard/document-search'
+import { ManageTagsDialog } from '@/components/dashboard/manage-tags-dialog'
 import Link from 'next/link'
 
 export default async function DocumentsPage({
@@ -45,7 +46,10 @@ export default async function DocumentsPage({
             Upload, organize, and manage your documents
           </p>
         </div>
-        <DocumentUpload folders={foldersList} />
+        <div className="flex gap-2">
+          <ManageTagsDialog />
+          <DocumentUpload folders={foldersList} />
+        </div>
       </div>
 
       {/* Storage Usage */}
