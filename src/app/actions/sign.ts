@@ -1,10 +1,12 @@
 'use server'
 
 import { db } from '@/lib/db'
-import { signatures, signatureParticipants, signatureRequests, signatureFields, signatureAuditLogs } from '@/lib/db/schema'
+import { signatures, signatureParticipants, signatureRequests, signatureFields, signatureAuditLogs, users } from '@/lib/db/schema'
 import { eq, and, asc } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
+import { sendEmail, generateSignatureRequestEmail, generateSignatureCompletedEmail, generateAllSignaturesCompletedEmail } from '@/lib/email'
+import { triggerOrgWebhooks } from './webhooks'
 
 const signatureInputSchema = z.object({
   accessToken: z.string().min(1),
@@ -160,6 +162,7 @@ export async function completeSignature(accessToken: string) {
       with: {
         request: {
           with: {
+            document: true,
             participants: {
               orderBy: asc(signatureParticipants.orderIndex),
             },
@@ -236,6 +239,66 @@ export async function completeSignature(accessToken: string) {
           completedAt: new Date().toISOString(),
         },
       })
+
+      // Get the request creator to send them completion notification
+      const creator = await db.query.users.findFirst({
+        where: eq(users.id, participant.request.createdBy),
+      })
+
+      if (creator) {
+        const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
+        const dashboardUrl = `${baseUrl}/dashboard/signatures/${participant.requestId}`
+
+        const emailHtml = generateAllSignaturesCompletedEmail({
+          recipientName: creator.fullName || creator.email,
+          documentName: participant.request.document.name,
+          requestTitle: participant.request.title,
+          participantCount: allParticipants.length,
+          completedAt: new Date(),
+          dashboardUrl,
+        })
+
+        await sendEmail({
+          to: creator.email,
+          subject: `All Signatures Completed: ${participant.request.title}`,
+          html: emailHtml,
+        })
+      }
+
+      // Notify all other participants that the document is fully executed
+      for (const otherParticipant of allParticipants) {
+        if (otherParticipant.id !== participant.id) {
+          const emailHtml = generateSignatureCompletedEmail({
+            recipientName: otherParticipant.fullName,
+            documentName: participant.request.document.name,
+            requestTitle: participant.request.title,
+            signerName: participant.fullName,
+            completedAt: new Date(),
+          })
+
+          await sendEmail({
+            to: otherParticipant.email,
+            subject: `Document Fully Executed: ${participant.request.title}`,
+            html: emailHtml,
+          })
+        }
+      }
+
+      // Trigger webhook for completed signature request
+      const orgId = (await db.query.signatureRequests.findFirst({
+        where: eq(signatureRequests.id, participant.requestId),
+        columns: { orgId: true },
+      }))?.orgId
+
+      if (orgId) {
+        await triggerOrgWebhooks(orgId, 'signature_request.completed', {
+          requestId: participant.requestId,
+          title: participant.request.title,
+          documentName: participant.request.document.name,
+          completedAt: new Date().toISOString(),
+          participantCount: allParticipants.length,
+        })
+      }
     } else if (participant.request.workflowType === 'sequential') {
       // Notify next participant in sequential workflow
       const nextParticipant = allParticipants.find(
@@ -261,7 +324,29 @@ export async function completeSignature(accessToken: string) {
           },
         })
 
-        // TODO: Send email notification to next participant
+        // Send email notification to next participant
+        const creator = await db.query.users.findFirst({
+          where: eq(users.id, participant.request.createdBy),
+        })
+
+        const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
+        const signingUrl = `${baseUrl}/sign/${nextParticipant.accessToken}`
+
+        const emailHtml = generateSignatureRequestEmail({
+          recipientName: nextParticipant.fullName,
+          senderName: creator?.fullName || creator?.email || 'Insign',
+          documentName: participant.request.document.name,
+          requestTitle: participant.request.title,
+          message: participant.request.message || undefined,
+          signingUrl,
+          expiresAt: participant.request.expiresAt || undefined,
+        })
+
+        await sendEmail({
+          to: nextParticipant.email,
+          subject: `Signature Request: ${participant.request.title}`,
+          html: emailHtml,
+        })
       }
     }
 

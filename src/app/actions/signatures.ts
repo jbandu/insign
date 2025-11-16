@@ -7,6 +7,8 @@ import { signatureRequestSchema, signatureRequestUpdateSchema, type SignatureReq
 import { eq, and, or, isNull, desc } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
 import { nanoid } from 'nanoid'
+import { sendEmail, generateSignatureRequestEmail } from '@/lib/email'
+import { triggerOrgWebhooks } from './webhooks'
 
 export async function getSignatureRequests() {
   const session = await auth()
@@ -228,6 +230,7 @@ export async function sendSignatureRequest(requestId: string) {
         eq(signatureRequests.orgId, currentUser.orgId)
       ),
       with: {
+        document: true,
         participants: {
           orderBy: (participants, { asc }) => [asc(participants.orderIndex)],
         },
@@ -256,7 +259,7 @@ export async function sendSignatureRequest(requestId: string) {
       ? [request.participants[0]] // Only first participant
       : request.participants // All participants
 
-    // Update participant status to notified
+    // Update participant status to notified and send emails
     for (const participant of participantsToNotify) {
       await db
         .update(signatureParticipants)
@@ -265,10 +268,27 @@ export async function sendSignatureRequest(requestId: string) {
           notifiedAt: new Date(),
         })
         .where(eq(signatureParticipants.id, participant.id))
-    }
 
-    // TODO: Send actual emails here
-    // For now, we'll just log the action
+      // Send email notification
+      const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
+      const signingUrl = `${baseUrl}/sign/${participant.accessToken}`
+
+      const emailHtml = generateSignatureRequestEmail({
+        recipientName: participant.fullName,
+        senderName: currentUser.fullName || currentUser.email,
+        documentName: request.document.name,
+        requestTitle: request.title,
+        message: request.message || undefined,
+        signingUrl,
+        expiresAt: request.expiresAt || undefined,
+      })
+
+      await sendEmail({
+        to: participant.email,
+        subject: `Signature Request: ${request.title}`,
+        html: emailHtml,
+      })
+    }
 
     // Log audit event
     await db.insert(signatureAuditLogs).values({
@@ -278,6 +298,15 @@ export async function sendSignatureRequest(requestId: string) {
         workflowType: request.workflowType,
         participantCount: participantsToNotify.length,
       },
+    })
+
+    // Trigger webhooks
+    await triggerOrgWebhooks(currentUser.orgId, 'signature_request.sent', {
+      requestId: request.id,
+      title: request.title,
+      documentName: request.document.name,
+      workflowType: request.workflowType,
+      participantCount: participantsToNotify.length,
     })
 
     revalidatePath('/dashboard/signatures')
