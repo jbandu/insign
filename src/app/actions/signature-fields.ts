@@ -71,13 +71,13 @@ export async function createSignatureField(input: SignatureFieldInput) {
       .values({
         requestId: validatedData.requestId,
         participantId: validatedData.participantId,
-        fieldType: validatedData.fieldType,
+        type: validatedData.fieldType,
         pageNumber: validatedData.pageNumber,
-        positionX: validatedData.positionX,
-        positionY: validatedData.positionY,
+        x: validatedData.positionX,
+        y: validatedData.positionY,
         width: validatedData.width,
         height: validatedData.height,
-        isRequired: validatedData.isRequired,
+        required: validatedData.isRequired,
       })
       .returning()
 
@@ -130,10 +130,7 @@ export async function updateSignatureField(
 
     const [updatedField] = await db
       .update(signatureFields)
-      .set({
-        ...input,
-        updatedAt: new Date(),
-      })
+      .set(input)
       .where(eq(signatureFields.id, fieldId))
       .returning()
 

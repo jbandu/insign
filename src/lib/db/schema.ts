@@ -604,6 +604,10 @@ export const signatureFieldsRelations = relations(signatureFields, ({ one }) => 
     fields: [signatureFields.requestId],
     references: [signatureRequests.id],
   }),
+  participant: one(signatureParticipants, {
+    fields: [signatureFields.participantId],
+    references: [signatureParticipants.id],
+  }),
 }))
 
 export const signaturesRelations = relations(signatures, ({ one }) => ({
