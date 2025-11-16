@@ -36,15 +36,17 @@
 - React Hook Form + Zod validation
 
 **Backend & Infrastructure:**
-- Supabase (PostgreSQL, Auth, Storage, Realtime)
-- Row Level Security (RLS) policies
-- Edge Functions for serverless compute
+- Next.js 14+ (App Router, Server Actions)
+- Neon (Serverless PostgreSQL)
+- Drizzle ORM (Type-safe database access)
+- NextAuth.js v5 (Authentication)
+- Vercel Blob (File storage)
 - RESTful API design
 
 **DevOps:**
-- Git-based deployment
-- Automated testing (Jest, Playwright)
-- CI/CD pipeline
+- Vercel deployment platform
+- Automated testing (Vitest, Playwright)
+- CI/CD pipeline (GitHub Actions)
 - Monitoring & logging
 
 ### Core Modules
@@ -122,8 +124,9 @@
 
 ### Prerequisites
 
-- Node.js 18+ and npm/yarn
-- Supabase account (free tier works for development)
+- Node.js 18+ and npm
+- Neon account (free tier works for development)
+- Vercel account (for deployment)
 - Git
 
 ### Installation
@@ -137,11 +140,12 @@ cd insign
 npm install
 
 # Set up environment variables
-cp .env.example .env
-# Edit .env with your Supabase credentials
+cp .env.example .env.local
+# Edit .env.local with your Neon credentials
 
-# Run database migrations
-npm run migrate
+# Generate and run database migrations
+npm run db:generate
+npm run db:migrate
 
 # Start development server
 npm run dev
@@ -149,12 +153,14 @@ npm run dev
 
 ### First Time Setup
 
-1. Create a Supabase project at [supabase.com](https://supabase.com)
-2. Copy your project URL and anon key to `.env`
-3. Run migrations to set up the database
-4. Seed initial data (optional): `npm run seed`
-5. Create your first organization account
-6. Start building!
+1. Create a Neon database at [neon.tech](https://neon.tech)
+2. Copy your connection string to `.env.local`
+3. Generate a NextAuth secret: `openssl rand -base64 32`
+4. Run migrations to set up the database: `npm run db:migrate`
+5. Start the development server: `npm run dev`
+6. Create your first organization account
+
+**See [SETUP.md](./SETUP.md) for detailed setup instructions!**
 
 ---
 
@@ -223,13 +229,15 @@ insign/
 │   ├── technical/             # Technical specs
 │   └── sprints/               # Sprint plans
 ├── src/                       # Source code
-│   ├── app/                   # App configuration
+│   ├── app/                   # Next.js App Router
+│   │   ├── api/               # API routes
+│   │   └── ...                # Pages
+│   ├── components/            # Shared components
 │   ├── features/              # Feature modules
-│   ├── shared/                # Shared components
-│   └── lib/                   # Third-party configs
-├── supabase/                  # Supabase configuration
-│   ├── migrations/            # Database migrations
-│   └── functions/             # Edge functions
+│   └── lib/                   # Libraries & configs
+│       ├── db/                # Database schema
+│       └── auth/              # Authentication
+├── drizzle/                   # Database migrations
 └── tests/                     # Test files
 ```
 
@@ -246,8 +254,11 @@ insign/
 
 ### External Resources
 
-- [Supabase Documentation](https://supabase.com/docs)
-- [React Documentation](https://react.dev)
+- [Next.js Documentation](https://nextjs.org/docs)
+- [Neon Documentation](https://neon.tech/docs)
+- [Drizzle ORM](https://orm.drizzle.team)
+- [Vercel Documentation](https://vercel.com/docs)
+- [NextAuth.js](https://authjs.dev)
 - [TailwindCSS](https://tailwindcss.com)
 - [TypeScript Handbook](https://www.typescriptlang.org/docs/)
 
