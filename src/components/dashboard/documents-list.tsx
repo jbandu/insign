@@ -3,10 +3,11 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { FileText, Download, Trash2, FolderOpen, File } from 'lucide-react'
+import { FileText, Download, Trash2, FolderOpen, File, Shield } from 'lucide-react'
 import { deleteDocument } from '@/app/actions/documents'
 import { useRouter } from 'next/navigation'
 import { DocumentTagSelector } from './document-tag-selector'
+import { ManagePermissionsDialog } from './manage-permissions-dialog'
 
 interface Document {
   id: string
@@ -132,6 +133,11 @@ export function DocumentsList({ documents }: DocumentsListProps) {
               </td>
               <td className="py-3">
                 <div className="flex items-center justify-end gap-2">
+                  <ManagePermissionsDialog documentId={doc.id} documentName={doc.name}>
+                    <Button variant="ghost" size="sm">
+                      <Shield className="h-4 w-4" />
+                    </Button>
+                  </ManagePermissionsDialog>
                   <Button
                     variant="ghost"
                     size="sm"
