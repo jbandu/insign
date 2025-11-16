@@ -568,6 +568,7 @@ export const webhooks = pgTable('webhooks', {
   description: text('description'),
   secret: text('secret').notNull(),
   isActive: boolean('is_active').default(true),
+  lastTriggeredAt: timestamp('last_triggered_at'),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
 })
