@@ -2,7 +2,7 @@
 
 import { db } from '@/lib/db'
 import { signatures, signatureParticipants, signatureRequests, signatureFields, signatureAuditLogs } from '@/lib/db/schema'
-import { eq, and } from 'drizzle-orm'
+import { eq, and, asc } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 
@@ -26,7 +26,7 @@ export async function getSigningSession(accessToken: string) {
           with: {
             document: true,
             participants: {
-              orderBy: (participants, { asc }) => [asc(participants.orderIndex)],
+              orderBy: asc(signatureParticipants.orderIndex),
             },
             fields: true,
           },
@@ -161,7 +161,7 @@ export async function completeSignature(accessToken: string) {
         request: {
           with: {
             participants: {
-              orderBy: (participants, { asc }) => [asc(participants.orderIndex)],
+              orderBy: asc(signatureParticipants.orderIndex),
             },
           },
         },
@@ -176,17 +176,17 @@ export async function completeSignature(accessToken: string) {
     const requiredFields = await db.query.signatureFields.findMany({
       where: and(
         eq(signatureFields.participantId, participant.id),
-        eq(signatureFields.isRequired, true)
+        eq(signatureFields.required, true)
       ),
     })
 
     // Check if all required fields are signed
-    const signatures = await db.query.signatures.findMany({
+    const existingSignatures = await db.query.signatures.findMany({
       where: eq(signatures.participantId, participant.id),
     })
 
     const allRequiredSigned = requiredFields.every(field =>
-      signatures.some(sig => sig.fieldId === field.id)
+      existingSignatures.some(sig => sig.fieldId === field.id)
     )
 
     if (!allRequiredSigned) {
