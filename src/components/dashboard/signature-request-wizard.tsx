@@ -26,6 +26,7 @@ interface Document {
   id: string
   name: string
   filePath: string
+  mimeType?: string
 }
 
 interface SignatureRequestWizardProps {
@@ -136,6 +137,13 @@ export function SignatureRequestWizard({ documents }: SignatureRequestWizardProp
         setError('Please select a document')
         return
       }
+
+      // Validate document is a PDF
+      if (selectedDocument && selectedDocument.mimeType && selectedDocument.mimeType !== 'application/pdf') {
+        setError('Only PDF documents are supported for signature requests. Please convert your document to PDF first.')
+        return
+      }
+
       setCurrentStep('participants')
     } else if (currentStep === 'participants') {
       if (participants.length === 0) {
@@ -307,11 +315,18 @@ export function SignatureRequestWizard({ documents }: SignatureRequestWizardProp
                   className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
                   <option value="">Choose a document...</option>
-                  {documents.map((doc) => (
-                    <option key={doc.id} value={doc.id}>
-                      {doc.name}
-                    </option>
-                  ))}
+                  {documents.map((doc) => {
+                    const isPDF = doc.mimeType === 'application/pdf'
+                    return (
+                      <option
+                        key={doc.id}
+                        value={doc.id}
+                        disabled={!isPDF}
+                      >
+                        {doc.name} {!isPDF && '(PDF required)'}
+                      </option>
+                    )
+                  })}
                 </select>
                 {errors.documentId && (
                   <p className="text-sm text-destructive">{errors.documentId.message}</p>
@@ -569,7 +584,10 @@ export function SignatureRequestWizard({ documents }: SignatureRequestWizardProp
                       onLoadSuccess={({ numPages }) => setNumPages(numPages)}
                       onLoadError={(error) => {
                         console.error('PDF load error:', error)
-                        setError(`Failed to load PDF: ${error.message}`)
+                        const errorMsg = selectedDocument?.mimeType !== 'application/pdf'
+                          ? 'This document is not a PDF file. Only PDF documents are supported for signature requests.'
+                          : `Failed to load PDF: ${error.message}`
+                        setError(errorMsg)
                       }}
                       loading={
                         <div className="flex items-center justify-center min-h-[800px] border-2 border-dashed rounded-lg bg-gray-50">
