@@ -17,9 +17,9 @@ import { Loader2, ArrowLeft, ArrowRight, Plus, Trash2, Check, FileText, Users, P
 import { cn } from '@/lib/utils'
 import { Document, Page, pdfjs } from 'react-pdf'
 
-// Configure PDF.js worker
+// Configure PDF.js worker - use local copy from public directory
 if (typeof window !== 'undefined') {
-  pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`
+  pdfjs.GlobalWorkerOptions.workerSrc = '/pdf-worker/pdf.worker.min.mjs'
 }
 
 interface Document {
