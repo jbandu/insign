@@ -3,19 +3,5 @@
   "devCommand": "npm run dev",
   "installCommand": "npm install",
   "framework": "nextjs",
-  "regions": ["iad1"],
-  "env": {
-    "DATABASE_URL": {
-      "type": "secret"
-    },
-    "NEXTAUTH_URL": {
-      "type": "system"
-    },
-    "NEXTAUTH_SECRET": {
-      "type": "secret"
-    },
-    "BLOB_READ_WRITE_TOKEN": {
-      "type": "secret"
-    }
-  }
+  "regions": ["iad1"]
 }
