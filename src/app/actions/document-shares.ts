@@ -212,7 +212,7 @@ export async function verifyShareAccess(shareToken: string, password?: string) {
     }
 
     // Check if max access count reached
-    if (share.maxAccessCount && share.accessCount >= share.maxAccessCount) {
+    if (share.maxAccessCount && (share.accessCount ?? 0) >= share.maxAccessCount) {
       return { success: false, error: 'This share link has reached its maximum access limit' }
     }
 
@@ -232,7 +232,7 @@ export async function verifyShareAccess(shareToken: string, password?: string) {
     await db
       .update(documentShares)
       .set({
-        accessCount: share.accessCount + 1,
+        accessCount: (share.accessCount ?? 0) + 1,
         lastAccessedAt: new Date(),
       })
       .where(eq(documentShares.id, share.id))
@@ -245,7 +245,7 @@ export async function verifyShareAccess(shareToken: string, password?: string) {
           id: share.id,
           hasPassword: !!share.passwordHash,
           expiresAt: share.expiresAt,
-          accessCount: share.accessCount + 1,
+          accessCount: (share.accessCount ?? 0) + 1,
           maxAccessCount: share.maxAccessCount,
         },
       },
