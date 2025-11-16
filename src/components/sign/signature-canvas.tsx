@@ -45,7 +45,7 @@ interface Signature {
 
 interface Participant {
   id: string
-  fullName: string
+  fullName: string | null
   email: string
   role: string
 }
@@ -411,7 +411,7 @@ export function SignatureCanvas({
                   id="typed-signature"
                   value={typedSignature}
                   onChange={(e) => setTypedSignature(e.target.value)}
-                  placeholder={participant.fullName}
+                  placeholder={participant.fullName || participant.email}
                   className="text-2xl font-serif"
                 />
               </div>

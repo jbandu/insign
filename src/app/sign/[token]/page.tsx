@@ -82,7 +82,7 @@ export default async function SignPage({ params }: SignPageProps) {
               </div>
               <div>
                 <p className="text-sm font-medium">Your Name</p>
-                <p className="text-sm text-muted-foreground">{participant.fullName}</p>
+                <p className="text-sm text-muted-foreground">{participant.fullName || participant.email}</p>
               </div>
               <div>
                 <p className="text-sm font-medium">Your Email</p>
