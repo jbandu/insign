@@ -1,9 +1,11 @@
 import { getSignatureRequest } from '@/app/actions/signatures'
+import { getAuditLogs } from '@/app/actions/audit'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { ArrowLeft, FileText, Calendar, Users, CheckCircle2, Clock, XCircle, Mail, Edit } from 'lucide-react'
 import { SignatureRequestActions } from '@/components/dashboard/signature-request-actions'
+import { AuditTrail } from '@/components/dashboard/audit-trail'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
@@ -40,6 +42,10 @@ export default async function SignatureRequestDetailPage({ params }: SignatureRe
   }
 
   const request = result.data
+
+  // Get audit logs
+  const auditResult = await getAuditLogs(params.id)
+  const auditLogs = auditResult.success ? auditResult.data || [] : []
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -301,6 +307,9 @@ export default async function SignatureRequestDetailPage({ params }: SignatureRe
           </CardContent>
         </Card>
       )}
+
+      {/* Audit Trail */}
+      <AuditTrail logs={auditLogs} />
     </div>
   )
 }
