@@ -136,7 +136,7 @@ export async function createSignatureRequest(input: SignatureRequestInput) {
       status: 'pending' as const,
     }))
 
-    await db.insert(signatureParticipants).values(participantsData)
+    const createdParticipants = await db.insert(signatureParticipants).values(participantsData).returning()
 
     // Log audit event
     await db.insert(signatureAuditLogs).values({
@@ -147,7 +147,13 @@ export async function createSignatureRequest(input: SignatureRequestInput) {
 
     revalidatePath('/dashboard/signatures')
 
-    return { success: true, data: newRequest }
+    return {
+      success: true,
+      data: {
+        ...newRequest,
+        participants: createdParticipants
+      }
+    }
   } catch (error) {
     console.error('Create signature request error:', error)
     return { success: false, error: 'Failed to create signature request' }

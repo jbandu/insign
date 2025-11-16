@@ -635,7 +635,7 @@ export const signatureAuditLogsRelations = relations(signatureAuditLogs, ({ one 
 }))
 
 // Documents Relations
-export const documentsRelations = relations(documents, ({ one }) => ({
+export const documentsRelations = relations(documents, ({ one, many }) => ({
   organization: one(organizations, {
     fields: [documents.orgId],
     references: [organizations.id],
@@ -652,6 +652,9 @@ export const documentsRelations = relations(documents, ({ one }) => ({
     fields: [documents.updatedBy],
     references: [users.id],
   }),
+  tagAssignments: many(documentTagAssignments),
+  permissions: many(documentPermissions),
+  versions: many(documentVersions),
 }))
 
 // Folders Relations
@@ -668,7 +671,7 @@ export const foldersRelations = relations(folders, ({ one, many }) => ({
 }))
 
 // Users Relations
-export const usersRelations = relations(users, ({ one }) => ({
+export const usersRelations = relations(users, ({ one, many }) => ({
   organization: one(organizations, {
     fields: [users.orgId],
     references: [organizations.id],
@@ -677,6 +680,7 @@ export const usersRelations = relations(users, ({ one }) => ({
     fields: [users.roleId],
     references: [roles.id],
   }),
+  mfaMethods: many(mfaMethods),
 }))
 
 // Organizations Relations
@@ -711,4 +715,73 @@ export const rolePermissionsRelations = relations(rolePermissions, ({ one }) => 
 // Permissions Relations
 export const permissionsRelations = relations(permissions, ({ many }) => ({
   roles: many(rolePermissions),
+}))
+
+// Document Tags Relations
+export const documentTagsRelations = relations(documentTags, ({ one, many }) => ({
+  organization: one(organizations, {
+    fields: [documentTags.orgId],
+    references: [organizations.id],
+  }),
+  createdByUser: one(users, {
+    fields: [documentTags.createdBy],
+    references: [users.id],
+  }),
+  documentAssignments: many(documentTagAssignments),
+}))
+
+// Document Tag Assignments Relations
+export const documentTagAssignmentsRelations = relations(documentTagAssignments, ({ one }) => ({
+  document: one(documents, {
+    fields: [documentTagAssignments.documentId],
+    references: [documents.id],
+  }),
+  tag: one(documentTags, {
+    fields: [documentTagAssignments.tagId],
+    references: [documentTags.id],
+  }),
+  assignedByUser: one(users, {
+    fields: [documentTagAssignments.assignedBy],
+    references: [users.id],
+  }),
+}))
+
+// Document Permissions Relations
+export const documentPermissionsRelations = relations(documentPermissions, ({ one }) => ({
+  document: one(documents, {
+    fields: [documentPermissions.documentId],
+    references: [documents.id],
+  }),
+  user: one(users, {
+    fields: [documentPermissions.userId],
+    references: [users.id],
+  }),
+  role: one(roles, {
+    fields: [documentPermissions.roleId],
+    references: [roles.id],
+  }),
+  grantedByUser: one(users, {
+    fields: [documentPermissions.grantedBy],
+    references: [users.id],
+  }),
+}))
+
+// Document Versions Relations
+export const documentVersionsRelations = relations(documentVersions, ({ one }) => ({
+  document: one(documents, {
+    fields: [documentVersions.documentId],
+    references: [documents.id],
+  }),
+  createdByUser: one(users, {
+    fields: [documentVersions.createdBy],
+    references: [users.id],
+  }),
+}))
+
+// MFA Methods Relations
+export const mfaMethodsRelations = relations(mfaMethods, ({ one }) => ({
+  user: one(users, {
+    fields: [mfaMethods.userId],
+    references: [users.id],
+  }),
 }))
