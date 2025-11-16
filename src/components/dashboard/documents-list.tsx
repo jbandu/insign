@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { FileText, Download, Trash2, FolderOpen, File } from 'lucide-react'
 import { deleteDocument } from '@/app/actions/documents'
 import { useRouter } from 'next/navigation'
+import { DocumentTagSelector } from './document-tag-selector'
 
 interface Document {
   id: string
@@ -85,6 +86,7 @@ export function DocumentsList({ documents }: DocumentsListProps) {
         <thead className="border-b">
           <tr className="text-left text-sm text-muted-foreground">
             <th className="pb-3 font-medium">Name</th>
+            <th className="pb-3 font-medium">Tags</th>
             <th className="pb-3 font-medium">Size</th>
             <th className="pb-3 font-medium">Folder</th>
             <th className="pb-3 font-medium">Type</th>
@@ -100,6 +102,12 @@ export function DocumentsList({ documents }: DocumentsListProps) {
                   {getFileIcon(doc.mimeType)}
                   <span className="font-medium">{doc.name}</span>
                 </div>
+              </td>
+              <td className="py-3">
+                <DocumentTagSelector
+                  documentId={doc.id}
+                  onTagsChange={() => router.refresh()}
+                />
               </td>
               <td className="py-3 text-muted-foreground">
                 {formatFileSize(doc.sizeBytes)}
