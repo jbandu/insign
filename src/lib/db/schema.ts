@@ -343,6 +343,49 @@ export const documentShares = pgTable('document_shares', {
   revokedAt: timestamp('revoked_at'),
 })
 
+export const signatureTemplates = pgTable('signature_templates', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  orgId: uuid('org_id')
+    .notNull()
+    .references(() => organizations.id, { onDelete: 'cascade' }),
+  name: text('name').notNull(),
+  description: text('description'),
+  workflowType: workflowTypeEnum('workflow_type').notNull().default('sequential'),
+  message: text('message'),
+  createdBy: uuid('created_by')
+    .notNull()
+    .references(() => users.id),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+})
+
+export const signatureTemplateParticipants = pgTable('signature_template_participants', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  templateId: uuid('template_id')
+    .notNull()
+    .references(() => signatureTemplates.id, { onDelete: 'cascade' }),
+  label: text('label').notNull(), // e.g., "Customer", "Manager", "HR"
+  role: participantRoleEnum('role').notNull().default('signer'),
+  order: integer('order').notNull().default(1),
+  createdAt: timestamp('created_at').defaultNow(),
+})
+
+export const signatureTemplateFields = pgTable('signature_template_fields', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  templateId: uuid('template_id')
+    .notNull()
+    .references(() => signatureTemplates.id, { onDelete: 'cascade' }),
+  participantLabel: text('participant_label').notNull(), // references participant.label
+  type: signatureFieldTypeEnum('type').notNull(),
+  pageNumber: integer('page_number').notNull().default(1),
+  x: real('x').notNull(),
+  y: real('y').notNull(),
+  width: real('width').notNull(),
+  height: real('height').notNull(),
+  required: boolean('required').default(true),
+  createdAt: timestamp('created_at').defaultNow(),
+})
+
 export const documentTags = pgTable(
   'document_tags',
   {
@@ -783,5 +826,35 @@ export const mfaMethodsRelations = relations(mfaMethods, ({ one }) => ({
   user: one(users, {
     fields: [mfaMethods.userId],
     references: [users.id],
+  }),
+}))
+
+// Signature Templates Relations
+export const signatureTemplatesRelations = relations(signatureTemplates, ({ one, many }) => ({
+  organization: one(organizations, {
+    fields: [signatureTemplates.orgId],
+    references: [organizations.id],
+  }),
+  createdByUser: one(users, {
+    fields: [signatureTemplates.createdBy],
+    references: [users.id],
+  }),
+  participants: many(signatureTemplateParticipants),
+  fields: many(signatureTemplateFields),
+}))
+
+// Signature Template Participants Relations
+export const signatureTemplateParticipantsRelations = relations(signatureTemplateParticipants, ({ one }) => ({
+  template: one(signatureTemplates, {
+    fields: [signatureTemplateParticipants.templateId],
+    references: [signatureTemplates.id],
+  }),
+}))
+
+// Signature Template Fields Relations
+export const signatureTemplateFieldsRelations = relations(signatureTemplateFields, ({ one }) => ({
+  template: one(signatureTemplates, {
+    fields: [signatureTemplateFields.templateId],
+    references: [signatureTemplates.id],
   }),
 }))
