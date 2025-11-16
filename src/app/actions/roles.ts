@@ -4,7 +4,7 @@ import { auth } from '@/lib/auth'
 import { db } from '@/lib/db'
 import { roles, users, rolePermissions, permissions } from '@/lib/db/schema'
 import { roleSchema, roleUpdateSchema, type RoleInput, type RoleUpdateInput } from '@/lib/validations/auth'
-import { eq, and, isNull } from 'drizzle-orm'
+import { eq, and, isNull, or } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
 
 export async function getRoles() {
