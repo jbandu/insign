@@ -712,3 +712,15 @@ export const rolePermissionsRelations = relations(rolePermissions, ({ one }) => 
 export const permissionsRelations = relations(permissions, ({ many }) => ({
   roles: many(rolePermissions),
 }))
+
+// Document Shares Relations
+export const documentSharesRelations = relations(documentShares, ({ one }) => ({
+  document: one(documents, {
+    fields: [documentShares.documentId],
+    references: [documents.id],
+  }),
+  createdByUser: one(users, {
+    fields: [documentShares.createdBy],
+    references: [users.id],
+  }),
+}))

@@ -3,8 +3,9 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { FileText, Download, Trash2, FolderOpen, File } from 'lucide-react'
+import { FileText, Download, Trash2, FolderOpen, File, Share2 } from 'lucide-react'
 import { deleteDocument } from '@/app/actions/documents'
+import { ShareDocumentDialog } from './share-document-dialog'
 import { useRouter } from 'next/navigation'
 
 interface Document {
@@ -133,6 +134,11 @@ export function DocumentsList({ documents }: DocumentsListProps) {
                       <Download className="h-4 w-4" />
                     </a>
                   </Button>
+                  <ShareDocumentDialog documentId={doc.id} documentName={doc.name}>
+                    <Button variant="ghost" size="sm">
+                      <Share2 className="h-4 w-4" />
+                    </Button>
+                  </ShareDocumentDialog>
                   <Button
                     variant="ghost"
                     size="sm"
