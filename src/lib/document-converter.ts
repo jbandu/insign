@@ -1,6 +1,29 @@
-'use server'
-
 import { put } from '@vercel/blob'
+
+/**
+ * Check if a file type can be converted to PDF
+ */
+export function isConvertibleDocument(mimeType: string): boolean {
+  const convertibleTypes = [
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
+    'application/msword', // .doc
+    'application/vnd.oasis.opendocument.text', // .odt
+  ]
+  return convertibleTypes.includes(mimeType)
+}
+
+/**
+ * Get a user-friendly name for a document type
+ */
+export function getDocumentTypeName(mimeType: string): string {
+  const typeNames: Record<string, string> = {
+    'application/pdf': 'PDF',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'Word Document',
+    'application/msword': 'Word Document (Legacy)',
+    'application/vnd.oasis.opendocument.text': 'OpenDocument Text',
+  }
+  return typeNames[mimeType] || 'Unknown'
+}
 
 /**
  * Convert a Word document to PDF
@@ -12,6 +35,8 @@ import { put } from '@vercel/blob'
  *
  * Free tier: 25 conversions/day
  * Alternative: Set DOCUMENT_CONVERSION_DISABLED=true to disable
+ *
+ * NOTE: This is NOT a server action - it's called from server actions
  */
 export async function convertWordToPDF(
   fileUrl: string,
@@ -158,29 +183,4 @@ export async function convertWordToPDF(
       error: error instanceof Error ? error.message : 'Failed to convert document',
     }
   }
-}
-
-/**
- * Check if a file type can be converted to PDF
- */
-export function isConvertibleDocument(mimeType: string): boolean {
-  const convertibleTypes = [
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
-    'application/msword', // .doc
-    'application/vnd.oasis.opendocument.text', // .odt
-  ]
-  return convertibleTypes.includes(mimeType)
-}
-
-/**
- * Get a user-friendly name for a document type
- */
-export function getDocumentTypeName(mimeType: string): string {
-  const typeNames: Record<string, string> = {
-    'application/pdf': 'PDF',
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'Word Document',
-    'application/msword': 'Word Document (Legacy)',
-    'application/vnd.oasis.opendocument.text': 'OpenDocument Text',
-  }
-  return typeNames[mimeType] || 'Unknown'
 }
