@@ -144,6 +144,7 @@ export const users = pgTable(
     mfaEnabled: boolean('mfa_enabled').default(false),
     lastLogin: timestamp('last_login'),
     preferences: jsonb('preferences').default({}),
+    language: text('language').default('en'),
     createdAt: timestamp('created_at').defaultNow(),
     updatedAt: timestamp('updated_at').defaultNow(),
     status: userStatusEnum('status').default('active'),

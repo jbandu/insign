@@ -34,6 +34,7 @@ export default async function SettingsPage() {
         firstName: currentUser.firstName,
         lastName: currentUser.lastName,
         email: currentUser.email,
+        language: currentUser.language,
       }}
       organization={{
         name: organization.name,

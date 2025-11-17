@@ -1,0 +1,214 @@
+{
+  "common": {
+    "appName": "InSign",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "confirm": "Confirm",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "submit": "Submit",
+    "close": "Close",
+    "search": "Search",
+    "filter": "Filter",
+    "export": "Export",
+    "import": "Import",
+    "download": "Download",
+    "upload": "Upload",
+    "yes": "Yes",
+    "no": "No",
+    "select": "Select",
+    "selectLanguage": "Select Language"
+  },
+  "auth": {
+    "signIn": "Sign In",
+    "signOut": "Sign Out",
+    "signUp": "Sign Up",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "forgotPassword": "Forgot Password?",
+    "rememberMe": "Remember me",
+    "noAccount": "Don't have an account?",
+    "haveAccount": "Already have an account?",
+    "signInToContinue": "Sign in to continue",
+    "createAccount": "Create Account",
+    "welcomeBack": "Welcome back!",
+    "getStarted": "Get started with {appName}"
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "documents": "Documents",
+    "signatures": "Signatures",
+    "templates": "Templates",
+    "settings": "Settings",
+    "profile": "Profile",
+    "help": "Help",
+    "logout": "Logout"
+  },
+  "landing": {
+    "hero": {
+      "title": "Digital Signatures Made Simple",
+      "subtitle": "Sign, send, and manage documents securely with our enterprise-grade e-signature platform",
+      "cta": "Get Started Free",
+      "learnMore": "Learn More"
+    },
+    "features": {
+      "title": "Everything You Need",
+      "subtitle": "Powerful features for modern businesses",
+      "easyToUse": "Easy to Use",
+      "easyToUseDesc": "Intuitive interface designed for everyone",
+      "secure": "Secure & Compliant",
+      "secureDesc": "Bank-level encryption and legal compliance",
+      "mobile": "Mobile Friendly",
+      "mobileDesc": "Sign documents anywhere, anytime",
+      "tracking": "Real-time Tracking",
+      "trackingDesc": "Monitor document status in real-time"
+    },
+    "pricing": {
+      "title": "Simple, Transparent Pricing",
+      "subtitle": "Choose the plan that fits your needs",
+      "free": "Free",
+      "starter": "Starter",
+      "business": "Business",
+      "enterprise": "Enterprise",
+      "perMonth": "per month",
+      "selectPlan": "Select Plan"
+    },
+    "cta": {
+      "title": "Ready to Get Started?",
+      "subtitle": "Join thousands of businesses using {appName}",
+      "button": "Start Free Trial"
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Manage your organization and account settings",
+    "organization": {
+      "title": "Organization Settings",
+      "subtitle": "Manage your organization details and preferences",
+      "name": "Organization Name",
+      "domain": "Domain",
+      "subscriptionTier": "Subscription Tier",
+      "status": "Status",
+      "update": "Update Organization",
+      "contactSupport": "Contact support to update organization settings"
+    },
+    "profile": {
+      "title": "Profile Settings",
+      "subtitle": "Manage your personal account details",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email",
+      "language": "Language",
+      "updateProfile": "Update Profile"
+    },
+    "security": {
+      "title": "Security",
+      "subtitle": "Manage your password and security settings",
+      "password": "Password",
+      "changePassword": "Change Password",
+      "lastChanged": "Last changed: {date}",
+      "twoFactor": "Two-Factor Authentication",
+      "twoFactorDesc": "Add an extra layer of security to your account",
+      "enable2FA": "Enable 2FA",
+      "requires2FASetup": "2FA setup requires additional configuration"
+    },
+    "storage": {
+      "title": "Storage Usage",
+      "subtitle": "View your organization's storage usage",
+      "used": "Used",
+      "remaining": "{amount} remaining"
+    },
+    "language": {
+      "title": "Language Preferences",
+      "subtitle": "Choose your preferred language",
+      "select": "Select Language",
+      "english": "English",
+      "spanish": "Spanish (Español)",
+      "success": "Language updated successfully",
+      "error": "Failed to update language"
+    },
+    "danger": {
+      "title": "Danger Zone",
+      "subtitle": "Irreversible and destructive actions",
+      "deleteData": {
+        "title": "Delete All Data (Except Users)",
+        "description": "This will permanently delete all documents, signatures, templates, and other data from your organization.",
+        "warning": "Users and organizations will be preserved, but all other data will be lost forever.",
+        "button": "Delete All Data",
+        "deleting": "Deleting...",
+        "success": "✓ All data deleted successfully! Page will refresh shortly...",
+        "confirmTitle": "Are you absolutely sure?",
+        "confirmDescription": "This action cannot be undone. This will permanently delete:",
+        "confirmWarning": "⚠️ Warning: Make sure you have backups before proceeding!",
+        "confirmButton": "Yes, Delete All Data",
+        "whatDeleted": "What will be deleted:",
+        "whatPreserved": "What will be preserved:",
+        "items": {
+          "documents": "All documents and document versions",
+          "signatures": "All signature requests and signatures",
+          "templates": "All templates and fields",
+          "folders": "All folders and tags",
+          "apiKeys": "All API keys and webhooks",
+          "auditLogs": "All audit logs and sessions",
+          "users": "Users and their profiles",
+          "organizations": "Organizations and settings"
+        }
+      }
+    }
+  },
+  "signatures": {
+    "title": "Signatures",
+    "newRequest": "New Signature Request",
+    "signDocument": "Sign Document",
+    "completed": "Completed",
+    "pending": "Pending",
+    "declined": "Declined",
+    "viewDocument": "View Document",
+    "downloadSigned": "Download Signed Document",
+    "status": "Status",
+    "participants": "Participants",
+    "createdAt": "Created At",
+    "completedAt": "Completed At",
+    "draw": "Draw",
+    "type": "Type",
+    "clear": "Clear",
+    "saveSignature": "Save Signature",
+    "clickToSign": "Click to sign",
+    "signed": "Signed",
+    "completeSignature": "Complete Signature",
+    "decline": "Decline",
+    "processing": "Processing..."
+  },
+  "documents": {
+    "title": "Documents",
+    "uploadDocument": "Upload Document",
+    "noDocuments": "No documents found",
+    "name": "Name",
+    "size": "Size",
+    "uploadedAt": "Uploaded At",
+    "actions": "Actions",
+    "delete": "Delete",
+    "share": "Share",
+    "version": "Version"
+  },
+  "errors": {
+    "generic": "Something went wrong. Please try again.",
+    "unauthorized": "You are not authorized to perform this action.",
+    "notFound": "The requested resource was not found.",
+    "networkError": "Network error. Please check your connection.",
+    "validationError": "Please check your input and try again."
+  },
+  "success": {
+    "saved": "Saved successfully",
+    "deleted": "Deleted successfully",
+    "updated": "Updated successfully",
+    "sent": "Sent successfully"
+  }
+}

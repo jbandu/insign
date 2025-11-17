@@ -20,6 +20,8 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { useRouter } from 'next/navigation'
+import { LanguageSelector } from '@/components/i18n/language-selector'
+import type { Locale } from '@/i18n'
 
 interface SettingsClientProps {
   user: {
@@ -27,6 +29,7 @@ interface SettingsClientProps {
     firstName: string | null
     lastName: string | null
     email: string
+    language: string | null
   }
   organization: {
     name: string
@@ -195,6 +198,29 @@ export function SettingsClient({ user, organization }: SettingsClientProps) {
               </div>
               <p className="text-xs text-muted-foreground">
                 10 GB remaining
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Language Preferences */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Language Preferences</CardTitle>
+            <CardDescription>
+              Choose your preferred language for the application
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="language">Language</Label>
+              <LanguageSelector
+                currentLanguage={(user.language as Locale) || 'en'}
+                isAuthenticated={true}
+                variant="select"
+              />
+              <p className="text-xs text-muted-foreground">
+                The interface will be displayed in your selected language
               </p>
             </div>
           </CardContent>
