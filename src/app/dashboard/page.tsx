@@ -215,6 +215,7 @@ export default async function DashboardPage() {
                     completed: 'bg-green-500',
                     declined: 'bg-red-500',
                     expired: 'bg-gray-400',
+                    cancelled: 'bg-gray-400',
                   }
 
                   return (
