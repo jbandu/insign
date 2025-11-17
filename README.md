@@ -45,8 +45,8 @@
 
 **DevOps:**
 - Vercel deployment platform
-- Automated testing (Vitest, Playwright)
-- CI/CD pipeline (GitHub Actions)
+- E2E Testing with Playwright (60+ test scenarios)
+- Automated testing in CI/CD pipeline (GitHub Actions)
 - Monitoring & logging
 
 ### Core Modules
@@ -162,6 +162,38 @@ npm run dev
 
 **See [SETUP.md](./SETUP.md) for detailed setup instructions!**
 
+### Running E2E Tests
+
+```bash
+# Run all E2E tests (headless)
+npm run test:e2e
+
+# Run tests with UI mode (interactive)
+npm run test:e2e:ui
+
+# Run tests in headed mode (see browser)
+npm run test:e2e:headed
+
+# Run tests in debug mode
+npm run test:e2e:debug
+
+# Run tests in specific browser
+npm run test:e2e:chromium
+npm run test:e2e:firefox
+npm run test:e2e:webkit
+
+# View test report
+npm run test:e2e:report
+```
+
+**Test Coverage:**
+- Authentication flows (signup, login, session management)
+- Document management (upload, download, delete, search)
+- User management (create, update, delete, permissions)
+- Folder management (create, navigate, organize)
+- Role-based access control (RBAC)
+- Signature workflows (create, sign, track)
+
 ---
 
 ## 🎯 Current Status
@@ -237,8 +269,12 @@ insign/
 │   └── lib/                   # Libraries & configs
 │       ├── db/                # Database schema
 │       └── auth/              # Authentication
+├── e2e/                       # E2E tests with Playwright
+│   ├── fixtures/              # Test fixtures
+│   ├── utils/                 # Test utilities
+│   └── *.spec.ts              # Test specifications
 ├── drizzle/                   # Database migrations
-└── tests/                     # Test files
+└── .github/workflows/         # CI/CD workflows
 ```
 
 ---
@@ -269,10 +305,11 @@ insign/
 | Metric | Target | Current |
 |--------|--------|---------|
 | User Stories | 111 | 111 ✅ |
-| Story Points | 510 | 0 |
-| Test Coverage | >80% | 0% |
-| API Endpoints | ~150 | 0 |
-| Sprints Planned | 18 | 0 |
+| Story Points | 510 | In Progress |
+| E2E Test Scenarios | 60+ | 60+ ✅ |
+| Test Coverage | >80% | In Progress |
+| API Endpoints | ~150 | In Progress |
+| Sprints Planned | 18 | 2 Completed |
 
 ---
 
