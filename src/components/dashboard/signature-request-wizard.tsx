@@ -13,7 +13,8 @@ import { Progress } from '@/components/ui/progress'
 import { signatureRequestSchema, type SignatureRequestInput } from '@/lib/validations/signatures'
 import { createSignatureRequest, sendSignatureRequest } from '@/app/actions/signatures'
 import { createSignatureField } from '@/app/actions/signature-fields'
-import { Loader2, ArrowLeft, ArrowRight, Plus, Trash2, Check, FileText, Users, Pencil, Send, User } from 'lucide-react'
+import { convertDocumentToPDF } from '@/app/actions/documents-convert'
+import { Loader2, ArrowLeft, ArrowRight, Plus, Trash2, Check, FileText, Users, Pencil, Send, User, RefreshCw } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Document, Page, pdfjs } from 'react-pdf'
 
@@ -59,6 +60,8 @@ export function SignatureRequestWizard({ documents }: SignatureRequestWizardProp
   const [numPages, setNumPages] = useState<number>(0)
   const [currentPage, setCurrentPage] = useState(1)
   const [pdfWidth, setPdfWidth] = useState<number>(800)
+  const [isConverting, setIsConverting] = useState(false)
+  const [convertedDocId, setConvertedDocId] = useState<string | null>(null)
 
   const {
     register,
@@ -131,6 +134,34 @@ export function SignatureRequestWizard({ documents }: SignatureRequestWizardProp
     setPlacedFields(placedFields.filter((_, i) => i !== index))
   }
 
+  const handleConvertDocument = async () => {
+    if (!selectedDocumentId) return
+
+    setIsConverting(true)
+    setError(null)
+
+    try {
+      const result = await convertDocumentToPDF(selectedDocumentId)
+
+      if (!result.success) {
+        setError(result.error || 'Failed to convert document')
+        setIsConverting(false)
+        return
+      }
+
+      // Update form to use the converted PDF
+      if (result.documentId) {
+        setConvertedDocId(result.documentId)
+        // The form will automatically update via watch()
+        setError(null)
+      }
+    } catch (err) {
+      setError('An unexpected error occurred during conversion')
+    } finally {
+      setIsConverting(false)
+    }
+  }
+
   const handleNext = async (e?: React.MouseEvent<HTMLButtonElement>) => {
     // Prevent any default form submission behavior
     e?.preventDefault()
@@ -142,9 +173,20 @@ export function SignatureRequestWizard({ documents }: SignatureRequestWizardProp
         return
       }
 
+      // Check if document is convertible but not yet converted
+      const isConvertible = selectedDocument?.mimeType &&
+        ['application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+         'application/msword',
+         'application/vnd.oasis.opendocument.text'].includes(selectedDocument.mimeType)
+
+      if (isConvertible && !convertedDocId) {
+        setError('Please convert this document to PDF before continuing')
+        return
+      }
+
       // Validate document is a PDF
       if (selectedDocument && selectedDocument.mimeType && selectedDocument.mimeType !== 'application/pdf') {
-        setError('Only PDF documents are supported for signature requests. Please convert your document to PDF first.')
+        setError('Only PDF documents are supported for signature requests.')
         return
       }
 
@@ -316,25 +358,83 @@ export function SignatureRequestWizard({ documents }: SignatureRequestWizardProp
                 <select
                   id="documentId"
                   {...register('documentId')}
-                  disabled={isLoading}
+                  disabled={isLoading || isConverting}
                   className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  onChange={(e) => {
+                    // Reset converted doc ID when selection changes
+                    setConvertedDocId(null)
+                  }}
                 >
                   <option value="">Choose a document...</option>
                   {documents.map((doc) => {
                     const isPDF = doc.mimeType === 'application/pdf'
+                    const isConvertible = ['application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                                          'application/msword',
+                                          'application/vnd.oasis.opendocument.text'].includes(doc.mimeType || '')
                     return (
                       <option
                         key={doc.id}
                         value={doc.id}
-                        disabled={!isPDF}
                       >
-                        {doc.name} {!isPDF && '(PDF required)'}
+                        {doc.name} {isPDF ? '(PDF)' : isConvertible ? '(Word - convertible)' : '(Not supported)'}
                       </option>
                     )
                   })}
                 </select>
                 {errors.documentId && (
                   <p className="text-sm text-destructive">{errors.documentId.message}</p>
+                )}
+
+                {/* Show convert button for Word documents */}
+                {selectedDocument && selectedDocument.mimeType &&
+                  ['application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                   'application/msword',
+                   'application/vnd.oasis.opendocument.text'].includes(selectedDocument.mimeType) &&
+                  !convertedDocId && (
+                    <div className="mt-3 p-4 bg-blue-50 dark:bg-blue-950 rounded-lg border border-blue-200 dark:border-blue-800">
+                      <div className="flex items-start gap-3">
+                        <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5" />
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                            Word Document Selected
+                          </p>
+                          <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">
+                            This document needs to be converted to PDF before you can send it for signatures.
+                          </p>
+                          <Button
+                            type="button"
+                            onClick={handleConvertDocument}
+                            disabled={isConverting}
+                            size="sm"
+                            className="mt-3"
+                          >
+                            {isConverting ? (
+                              <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Converting...
+                              </>
+                            ) : (
+                              <>
+                                <RefreshCw className="mr-2 h-4 w-4" />
+                                Convert to PDF
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                {/* Show success message after conversion */}
+                {convertedDocId && (
+                  <div className="mt-3 p-3 bg-green-50 dark:bg-green-950 rounded-lg border border-green-200 dark:border-green-800">
+                    <div className="flex items-center gap-2">
+                      <Check className="h-4 w-4 text-green-600 dark:text-green-400" />
+                      <p className="text-sm text-green-900 dark:text-green-100">
+                        Document converted to PDF successfully
+                      </p>
+                    </div>
+                  </div>
                 )}
               </div>
 

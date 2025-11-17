@@ -178,10 +178,10 @@ export async function generateSignedPDF(requestId: string): Promise<{ success: b
     // Save the modified PDF
     const pdfBytes = await pdfDoc.save()
 
-    // Upload to Vercel Blob
+    // Upload to Vercel Blob (convert Uint8Array to Buffer)
     const filename = `signed-${request.document.name || 'document'}-${Date.now()}.pdf`
 
-    const blob = await put(filename, pdfBytes, {
+    const blob = await put(filename, Buffer.from(pdfBytes), {
       access: 'public',
       contentType: 'application/pdf',
     })
