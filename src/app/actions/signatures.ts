@@ -251,11 +251,17 @@ export async function sendSignatureRequest(requestId: string) {
       return { success: false, error: 'Request already sent' }
     }
 
-    // Update request status
+    // Generate unique audit ID for document tracking
+    const timestamp = Date.now().toString(36)
+    const randomPart = Math.random().toString(36).substring(2, 10)
+    const auditId = `AUD-${timestamp}-${randomPart}`.toUpperCase()
+
+    // Update request status and add audit ID
     await db
       .update(signatureRequests)
       .set({
         status: 'sent',
+        sealHash: auditId,
         updatedAt: new Date(),
       })
       .where(eq(signatureRequests.id, requestId))

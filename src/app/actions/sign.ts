@@ -7,6 +7,7 @@ import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { sendEmail, generateSignatureRequestEmail, generateSignatureCompletedEmail, generateAllSignaturesCompletedEmail } from '@/lib/email'
 import { triggerOrgWebhooks } from './webhooks'
+import { generateSignedPDF } from '@/lib/pdf-generator'
 
 const signatureInputSchema = z.object({
   accessToken: z.string().min(1),
@@ -243,6 +244,30 @@ export async function completeSignature(accessToken: string) {
           completedAt: new Date().toISOString(),
         },
       })
+
+      // Generate signed PDF with all signatures embedded
+      const pdfResult = await generateSignedPDF(participant.requestId)
+
+      if (!pdfResult.success) {
+        console.error('Failed to generate signed PDF:', pdfResult.error)
+        // Don't fail the entire completion, just log the error
+        await db.insert(signatureAuditLogs).values({
+          requestId: participant.requestId,
+          action: 'pdf_generation_failed',
+          metadata: {
+            error: pdfResult.error,
+          },
+        })
+      } else {
+        // Log successful PDF generation
+        await db.insert(signatureAuditLogs).values({
+          requestId: participant.requestId,
+          action: 'signed_pdf_generated',
+          metadata: {
+            pdfUrl: pdfResult.url,
+          },
+        })
+      }
 
       // Get the request creator to send them completion notification
       const creator = await db.query.users.findFirst({
