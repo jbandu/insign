@@ -98,14 +98,14 @@ export async function createTestUser(userData: {
     domain: userData.orgDomain,
     subscriptionTier: 'trial',
     maxUsers: 10,
-    maxStorage: 10737418240, // 10GB
+    maxStorageBytes: 10737418240, // 10GB
   }).returning();
 
   // Create storage quota
   await db.insert(schema.storageQuotas).values({
     orgId: org.id,
-    totalQuota: 10737418240,
-    usedStorage: 0,
+    totalBytes: 10737418240,
+    usedBytes: 0,
   });
 
   // Create admin role if needed
