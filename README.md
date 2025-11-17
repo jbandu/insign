@@ -165,7 +165,7 @@ npm run dev
 ### Running E2E Tests
 
 ```bash
-# Run all E2E tests (headless)
+# Run all E2E tests (headless) - tests against local dev server
 npm run test:e2e
 
 # Run tests with UI mode (interactive)
@@ -184,7 +184,12 @@ npm run test:e2e:webkit
 
 # View test report
 npm run test:e2e:report
+
+# Test against Vercel deployment
+PLAYWRIGHT_BASE_URL=https://insign-pi.vercel.app npm run test:e2e
 ```
+
+**CI/CD:** GitHub Actions automatically runs E2E tests against the Vercel production deployment on every push and pull request.
 
 **Test Coverage:**
 - Authentication flows (signup, login, session management)

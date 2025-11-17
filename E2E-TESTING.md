@@ -69,6 +69,29 @@ NEXTAUTH_SECRET=your_secret
 NEXTAUTH_URL=http://localhost:3000
 ```
 
+### Testing Against Different Environments
+
+By default, tests run against your **local development server** (http://localhost:3000), which is automatically started before tests run.
+
+To test against a **deployed environment** (e.g., Vercel), set the `PLAYWRIGHT_BASE_URL` environment variable:
+
+```bash
+# Test against Vercel production
+PLAYWRIGHT_BASE_URL=https://insign-pi.vercel.app npm run test:e2e
+
+# Test against Vercel preview deployment
+PLAYWRIGHT_BASE_URL=https://insign-<branch>-<hash>.vercel.app npm run test:e2e
+
+# Test against staging environment
+PLAYWRIGHT_BASE_URL=https://staging.insign.app npm run test:e2e
+```
+
+**Note:** When `PLAYWRIGHT_BASE_URL` is set, the local dev server will NOT be started automatically. This is useful for:
+- Testing production deployments
+- Running tests in CI/CD against Vercel
+- Testing preview deployments
+- Faster test execution (no build time)
+
 ### Basic Commands
 
 ```bash
@@ -269,6 +292,8 @@ Tests automatically run on:
 - Push to `main`, `develop`, or `claude/**` branches
 - Pull requests to `main` or `develop`
 - Manual workflow dispatch
+
+**Important:** GitHub Actions tests run against the **Vercel production deployment** (https://insign-pi.vercel.app), not a local build. This ensures tests verify the actual deployed application and run faster without needing to build the app in CI.
 
 See `.github/workflows/e2e-tests.yml` for configuration.
 
