@@ -177,8 +177,12 @@ export default async function DashboardPage() {
                         {doc.createdByUser?.firstName && doc.createdByUser?.lastName
                           ? `${doc.createdByUser.firstName} ${doc.createdByUser.lastName}`
                           : doc.createdByUser?.email || 'Unknown'}
-                        {' • '}
-                        {formatDistanceToNow(new Date(doc.createdAt), { addSuffix: true })}
+                        {doc.createdAt && (
+                          <>
+                            {' • '}
+                            {formatDistanceToNow(new Date(doc.createdAt), { addSuffix: true })}
+                          </>
+                        )}
                       </p>
                     </div>
                     <FileText className="h-4 w-4 text-muted-foreground flex-shrink-0 ml-2" />
@@ -223,8 +227,12 @@ export default async function DashboardPage() {
                         <p className="text-sm font-medium truncate">{request.title}</p>
                         <p className="text-xs text-muted-foreground">
                           {request.participants.length} participant{request.participants.length !== 1 ? 's' : ''}
-                          {' • '}
-                          {formatDistanceToNow(new Date(request.createdAt), { addSuffix: true })}
+                          {request.createdAt && (
+                            <>
+                              {' • '}
+                              {formatDistanceToNow(new Date(request.createdAt), { addSuffix: true })}
+                            </>
+                          )}
                         </p>
                       </div>
                       <Badge
