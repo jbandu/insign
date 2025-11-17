@@ -42,20 +42,11 @@ export async function cleanupTestData(email: string) {
     // 1. Delete user sessions
     await db.delete(schema.userSessions).where(eq(schema.userSessions.userId, user.id));
 
-    // 2. Delete signature-related data
-    await db.delete(schema.signatureAuditLogs).where(eq(schema.signatureAuditLogs.orgId, org.id));
-    await db.delete(schema.signatureCertificates).where(eq(schema.signatureCertificates.orgId, org.id));
-    await db.delete(schema.signatures).where(eq(schema.signatures.orgId, org.id));
-    await db.delete(schema.signatureFields).where(eq(schema.signatureFields.orgId, org.id));
-    await db.delete(schema.signatureParticipants).where(eq(schema.signatureParticipants.orgId, org.id));
+    // 2. Delete signature requests (will cascade to related tables)
     await db.delete(schema.signatureRequests).where(eq(schema.signatureRequests.orgId, org.id));
 
     // 3. Delete document-related data
-    await db.delete(schema.documentTagAssignments).where(eq(schema.documentTagAssignments.orgId, org.id));
     await db.delete(schema.documentTags).where(eq(schema.documentTags.orgId, org.id));
-    await db.delete(schema.documentShares).where(eq(schema.documentShares.orgId, org.id));
-    await db.delete(schema.documentPermissions).where(eq(schema.documentPermissions.orgId, org.id));
-    await db.delete(schema.documentVersions).where(eq(schema.documentVersions.orgId, org.id));
     await db.delete(schema.documents).where(eq(schema.documents.orgId, org.id));
     await db.delete(schema.folders).where(eq(schema.folders.orgId, org.id));
 
