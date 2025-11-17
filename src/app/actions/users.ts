@@ -41,7 +41,7 @@ export async function getUsers() {
 export async function createUser(input: UserCreateInput) {
   const session = await auth()
   if (!session?.user?.id) {
-    return { success: false, error: 'Unauthorized' }
+    return { success: false, error: 'You must be logged in to perform this action' }
   }
 
   try {
@@ -52,33 +52,39 @@ export async function createUser(input: UserCreateInput) {
     })
 
     if (!currentUser) {
-      return { success: false, error: 'User not found' }
+      return { success: false, error: 'Your user account could not be found' }
     }
+
+    // Normalize email
+    const normalizedEmail = validatedData.email.toLowerCase().trim()
 
     // Check if email already exists in this organization
     const existingUser = await db.query.users.findFirst({
       where: (users, { and, eq }) =>
         and(
           eq(users.orgId, currentUser.orgId),
-          eq(users.email, validatedData.email)
+          eq(users.email, normalizedEmail)
         ),
     })
 
     if (existingUser) {
-      return { success: false, error: 'Email already exists in your organization' }
+      return {
+        success: false,
+        error: 'A user with this email address already exists in your organization'
+      }
     }
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(validatedData.password, 10)
+    // Hash password with higher cost factor
+    const hashedPassword = await bcrypt.hash(validatedData.password, 12)
 
     const [newUser] = await db
       .insert(users)
       .values({
         orgId: currentUser.orgId,
-        email: validatedData.email,
+        email: normalizedEmail,
         password: hashedPassword,
-        firstName: validatedData.firstName,
-        lastName: validatedData.lastName,
+        firstName: validatedData.firstName.trim(),
+        lastName: validatedData.lastName.trim(),
         roleId: validatedData.roleId,
         status: 'active',
       })
@@ -86,10 +92,19 @@ export async function createUser(input: UserCreateInput) {
 
     revalidatePath('/dashboard/users')
 
-    return { success: true, data: newUser }
+    return {
+      success: true,
+      data: newUser,
+      message: 'User created successfully'
+    }
   } catch (error) {
     console.error('Create user error:', error)
-    return { success: false, error: 'Failed to create user' }
+
+    if (error instanceof Error && error.message.includes('unique constraint')) {
+      return { success: false, error: 'This email address is already in use' }
+    }
+
+    return { success: false, error: 'Unable to create user. Please try again.' }
   }
 }
 
@@ -140,7 +155,7 @@ export async function updateUser(userId: string, input: UserUpdateInput) {
 export async function deleteUser(userId: string) {
   const session = await auth()
   if (!session?.user?.id) {
-    return { success: false, error: 'Unauthorized' }
+    return { success: false, error: 'You must be logged in to perform this action' }
   }
 
   try {
@@ -149,30 +164,49 @@ export async function deleteUser(userId: string) {
     })
 
     if (!currentUser) {
-      return { success: false, error: 'User not found' }
+      return { success: false, error: 'Your user account could not be found' }
     }
 
     // Can't delete yourself
     if (userId === session.user.id) {
-      return { success: false, error: 'Cannot delete your own account' }
+      return {
+        success: false,
+        error: 'You cannot delete your own account. Please contact another administrator.'
+      }
     }
 
     // Verify the user being deleted belongs to the same organization
     const userToDelete = await db.query.users.findFirst({
       where: eq(users.id, userId),
+      with: {
+        role: true,
+      },
     })
 
-    if (!userToDelete || userToDelete.orgId !== currentUser.orgId) {
-      return { success: false, error: 'User not found or unauthorized' }
+    if (!userToDelete) {
+      return { success: false, error: 'The user you are trying to delete does not exist' }
+    }
+
+    if (userToDelete.orgId !== currentUser.orgId) {
+      return {
+        success: false,
+        error: 'You do not have permission to delete users from other organizations'
+      }
     }
 
     await db.delete(users).where(eq(users.id, userId))
 
     revalidatePath('/dashboard/users')
 
-    return { success: true }
+    return {
+      success: true,
+      message: 'User deleted successfully'
+    }
   } catch (error) {
     console.error('Delete user error:', error)
-    return { success: false, error: 'Failed to delete user' }
+    return {
+      success: false,
+      error: 'Unable to delete user. This user may have associated data that must be removed first.'
+    }
   }
 }

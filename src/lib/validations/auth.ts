@@ -6,8 +6,7 @@ export const organizationSchema = z.object({
   domain: z
     .string()
     .min(3, 'Domain must be at least 3 characters')
-    .regex(/^[a-z0-9-]+$/, 'Domain can only contain lowercase letters, numbers, and hyphens')
-    .toLowerCase(),
+    .regex(/^[a-z0-9-]+$/, 'Domain can only contain lowercase letters, numbers, and hyphens'),
   timezone: z.string().optional().default('UTC'),
 })
 
@@ -32,7 +31,7 @@ export const passwordSchema = z
 
 // User validation
 export const userSchema = z.object({
-  email: z.string().email('Invalid email address').toLowerCase(),
+  email: z.string().email('Invalid email address'),
   password: passwordSchema,
   firstName: z.string().min(2, 'First name must be at least 2 characters').max(50, 'First name must not exceed 50 characters'),
   lastName: z.string().min(2, 'Last name must be at least 2 characters').max(50, 'Last name must not exceed 50 characters'),
@@ -74,11 +73,10 @@ export const signupSchema = z.object({
     .regex(/^[a-z0-9-]+$/, 'Domain can only contain lowercase letters, numbers, and hyphens')
     .refine((val) => !val.startsWith('-') && !val.endsWith('-'), {
       message: 'Domain cannot start or end with a hyphen',
-    })
-    .toLowerCase(),
+    }),
 
   // User
-  email: z.string().email('Invalid email address').toLowerCase(),
+  email: z.string().email('Invalid email address'),
   password: passwordSchema,
   confirmPassword: z.string(),
   firstName: z.string().min(2, 'First name must be at least 2 characters').max(50, 'First name must not exceed 50 characters'),
@@ -110,7 +108,7 @@ export const roleUpdateSchema = roleSchema.partial()
 // Types
 // Password reset validation
 export const passwordResetRequestSchema = z.object({
-  email: z.string().email('Invalid email address').toLowerCase(),
+  email: z.string().email('Invalid email address'),
 })
 
 export const passwordResetSchema = z.object({

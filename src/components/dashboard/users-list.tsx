@@ -2,7 +2,8 @@
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Pencil, Trash2, MoreVertical } from 'lucide-react'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog'
+import { Pencil, Trash2, MoreVertical, Loader2 } from 'lucide-react'
 import { deleteUser } from '@/app/actions/users'
 import { useRouter } from 'next/navigation'
 
@@ -25,19 +26,28 @@ interface UsersListProps {
 export function UsersList({ users }: UsersListProps) {
   const router = useRouter()
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false)
+  const [userToDelete, setUserToDelete] = useState<User | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
-  const handleDelete = async (userId: string) => {
-    if (!confirm('Are you sure you want to delete this user?')) {
-      return
-    }
+  const handleDeleteClick = (user: User) => {
+    setUserToDelete(user)
+    setConfirmDeleteOpen(true)
+  }
 
-    setDeletingId(userId)
-    const result = await deleteUser(userId)
+  const handleDeleteConfirm = async () => {
+    if (!userToDelete) return
+
+    setDeletingId(userToDelete.id)
+    setError(null)
+    const result = await deleteUser(userToDelete.id)
 
     if (result.success) {
+      setConfirmDeleteOpen(false)
+      setUserToDelete(null)
       router.refresh()
     } else {
-      alert(result.error || 'Failed to delete user')
+      setError(result.error || 'Failed to delete user')
     }
     setDeletingId(null)
   }
@@ -51,7 +61,14 @@ export function UsersList({ users }: UsersListProps) {
   }
 
   return (
-    <div className="overflow-x-auto">
+    <>
+      {error && (
+        <div className="mb-4 rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+          {error}
+        </div>
+      )}
+
+      <div className="overflow-x-auto">
       <table className="w-full">
         <thead className="border-b">
           <tr className="text-left text-sm text-muted-foreground">
@@ -103,10 +120,14 @@ export function UsersList({ users }: UsersListProps) {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => handleDelete(user.id)}
+                    onClick={() => handleDeleteClick(user)}
                     disabled={deletingId === user.id}
                   >
-                    <Trash2 className="h-4 w-4 text-destructive" />
+                    {deletingId === user.id ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    )}
                   </Button>
                 </div>
               </td>
@@ -115,5 +136,17 @@ export function UsersList({ users }: UsersListProps) {
         </tbody>
       </table>
     </div>
+
+    <ConfirmDialog
+      open={confirmDeleteOpen}
+      onOpenChange={setConfirmDeleteOpen}
+      title="Delete User"
+      description={`Are you sure you want to delete ${userToDelete?.firstName} ${userToDelete?.lastName} (${userToDelete?.email})? This action cannot be undone.`}
+      confirmText="Delete"
+      cancelText="Cancel"
+      onConfirm={handleDeleteConfirm}
+      variant="destructive"
+    />
+  </>
   )
 }
