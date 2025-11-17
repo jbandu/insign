@@ -144,8 +144,20 @@ export async function createTestUser(userData: {
 export async function createTestFolder(organizationId: string, userId: string, name: string, parentId?: string) {
   const db = getTestDb();
 
+  // Build path based on parent
+  let path = `/${name}`;
+  if (parentId) {
+    const parent = await db.query.folders.findFirst({
+      where: eq(schema.folders.id, parentId),
+    });
+    if (parent) {
+      path = `${parent.path}/${name}`;
+    }
+  }
+
   const [folder] = await db.insert(schema.folders).values({
     name,
+    path,
     orgId: organizationId,
     createdBy: userId,
     parentId: parentId || null,
@@ -168,11 +180,11 @@ export async function createTestDocument(
   const [document] = await db.insert(schema.documents).values({
     name,
     orgId: organizationId,
-    uploadedBy: userId,
+    createdBy: userId,
     folderId: folderId || null,
-    fileType: 'application/pdf',
-    fileSize: 1024,
-    blobUrl: 'https://example.com/test.pdf',
+    mimeType: 'application/pdf',
+    sizeBytes: 1024,
+    filePath: 'https://example.com/test.pdf',
   }).returning();
 
   return document;
