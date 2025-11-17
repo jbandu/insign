@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { FileSignature, Eye, Send, XCircle, Trash2, Users } from 'lucide-react'
+import { FileSignature, Eye, Send, XCircle, Trash2, Users, Download } from 'lucide-react'
 import { sendSignatureRequest, cancelSignatureRequest, deleteSignatureRequest } from '@/app/actions/signatures'
 import { useRouter } from 'next/navigation'
 
@@ -13,6 +13,7 @@ interface SignatureRequest {
   status: string | null
   workflowType: string | null
   createdAt: Date | null
+  certificateUrl?: string | null
   document: {
     name: string
   }
@@ -136,6 +137,19 @@ export function SignatureRequestsList({ requests }: SignatureRequestsListProps) 
             >
               <Eye className="h-4 w-4" />
             </Button>
+
+            {request.status === 'completed' && request.certificateUrl && (
+              <Button
+                variant="default"
+                size="sm"
+                asChild
+                className="bg-green-600 hover:bg-green-700"
+              >
+                <a href={request.certificateUrl} target="_blank" rel="noopener noreferrer" download>
+                  <Download className="h-4 w-4" />
+                </a>
+              </Button>
+            )}
 
             {request.status === 'draft' && (
               <>

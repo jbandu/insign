@@ -180,12 +180,35 @@ export default async function SignatureRequestDetailPage({ params }: SignatureRe
                 {(request.document.sizeBytes / 1024 / 1024).toFixed(2)} MB
               </p>
             </div>
-            {request.document.filePath && (
-              <Button asChild variant="outline" size="sm">
-                <a href={request.document.filePath} target="_blank" rel="noopener noreferrer">
-                  View Document
-                </a>
-              </Button>
+            <div className="flex flex-col gap-2">
+              {request.document.filePath && (
+                <Button asChild variant="outline" size="sm">
+                  <a href={request.document.filePath} target="_blank" rel="noopener noreferrer">
+                    View Original Document
+                  </a>
+                </Button>
+              )}
+              {request.certificateUrl && (
+                <Button asChild variant="default" size="sm" className="bg-green-600 hover:bg-green-700">
+                  <a href={request.certificateUrl} target="_blank" rel="noopener noreferrer" download>
+                    <CheckCircle2 className="h-4 w-4 mr-2" />
+                    Download Signed Document
+                  </a>
+                </Button>
+              )}
+            </div>
+            {request.certificateUrl && (
+              <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                <p className="text-xs text-green-800 font-medium">
+                  ✓ Signed document available with all signatures embedded
+                </p>
+                {request.completedAt && (
+                  <p className="text-xs text-green-700 mt-1">
+                    Completed on {new Date(request.completedAt).toLocaleDateString()} at{' '}
+                    {new Date(request.completedAt).toLocaleTimeString()}
+                  </p>
+                )}
+              </div>
             )}
           </CardContent>
         </Card>
