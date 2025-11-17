@@ -64,7 +64,7 @@ export default async function DashboardPage() {
     orderBy: desc(documents.createdAt),
     limit: 5,
     with: {
-      creator: {
+      createdByUser: {
         columns: {
           firstName: true,
           lastName: true,
@@ -174,9 +174,9 @@ export default async function DashboardPage() {
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium truncate">{doc.name}</p>
                       <p className="text-xs text-muted-foreground">
-                        {doc.creator?.firstName && doc.creator?.lastName
-                          ? `${doc.creator.firstName} ${doc.creator.lastName}`
-                          : doc.creator?.email || 'Unknown'}
+                        {doc.createdByUser?.firstName && doc.createdByUser?.lastName
+                          ? `${doc.createdByUser.firstName} ${doc.createdByUser.lastName}`
+                          : doc.createdByUser?.email || 'Unknown'}
                         {' • '}
                         {formatDistanceToNow(new Date(doc.createdAt), { addSuffix: true })}
                       </p>
