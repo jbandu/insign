@@ -62,6 +62,7 @@ export function SignatureRequestWizard({ documents }: SignatureRequestWizardProp
   const [pdfWidth, setPdfWidth] = useState<number>(800)
   const [isConverting, setIsConverting] = useState(false)
   const [convertedDocId, setConvertedDocId] = useState<string | null>(null)
+  const [convertedPdfUrl, setConvertedPdfUrl] = useState<string | null>(null)
 
   const {
     register,
@@ -151,8 +152,9 @@ export function SignatureRequestWizard({ documents }: SignatureRequestWizardProp
       }
 
       // Update form to use the converted PDF
-      if (result.documentId) {
+      if (result.documentId && result.pdfUrl) {
         setConvertedDocId(result.documentId)
+        setConvertedPdfUrl(result.pdfUrl)
         // Update the form's documentId to point to the new PDF
         setValue('documentId', result.documentId)
         setError(null)
@@ -175,6 +177,13 @@ export function SignatureRequestWizard({ documents }: SignatureRequestWizardProp
         return
       }
 
+      // If document was converted, we trust the conversion and proceed
+      // (the converted PDF might not be in the documents array yet due to caching)
+      if (convertedDocId && selectedDocumentId === convertedDocId) {
+        setCurrentStep('participants')
+        return
+      }
+
       // Check if document is convertible but not yet converted
       const isConvertible = selectedDocument?.mimeType &&
         ['application/vnd.openxmlformats-officedocument.wordprocessingml.document',
@@ -186,8 +195,8 @@ export function SignatureRequestWizard({ documents }: SignatureRequestWizardProp
         return
       }
 
-      // Validate document is a PDF
-      if (selectedDocument && selectedDocument.mimeType && selectedDocument.mimeType !== 'application/pdf') {
+      // Validate document is a PDF (skip if it was just converted)
+      if (selectedDocument && selectedDocument.mimeType && selectedDocument.mimeType !== 'application/pdf' && !convertedDocId) {
         setError('Only PDF documents are supported for signature requests.')
         return
       }
@@ -685,9 +694,9 @@ export function SignatureRequestWizard({ documents }: SignatureRequestWizardProp
               <CardContent>
                 <div className="relative">
                   {/* PDF Renderer */}
-                  {selectedDocument?.filePath ? (
+                  {(selectedDocument?.filePath || convertedPdfUrl) ? (
                     <Document
-                      file={{ url: selectedDocument.filePath }}
+                      file={{ url: convertedPdfUrl || selectedDocument?.filePath || '' }}
                       onLoadSuccess={({ numPages }) => setNumPages(numPages)}
                       onLoadError={(error) => {
                         console.error('PDF load error:', error)
