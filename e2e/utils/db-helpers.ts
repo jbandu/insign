@@ -117,7 +117,7 @@ export async function createTestUser(userData: {
     [role] = await db.insert(schema.roles).values({
       name: userData.role || 'admin',
       orgId: org.id,
-      isSystemRole: true,
+      isSystem: true,
     }).returning();
   }
 
