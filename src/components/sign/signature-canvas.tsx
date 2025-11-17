@@ -84,6 +84,10 @@ export function SignatureCanvas({
   const [error, setError] = useState<string | null>(null)
   const [numPages, setNumPages] = useState<number>(0)
   const [currentPage, setCurrentPage] = useState(1)
+  const [reusableSignature, setReusableSignature] = useState<{
+    data: string
+    type: 'draw' | 'type'
+  } | null>(null)
   const pdfWidth = 800
 
   const requiredFields = fields.filter(f => f.required)
@@ -161,15 +165,31 @@ export function SignatureCanvas({
 
     if (signatureMode === 'draw') {
       const canvas = canvasRef.current
-      if (!canvas) return
+      if (!canvas) {
+        setError('Canvas not available')
+        setIsLoading(false)
+        return
+      }
       signatureData = canvas.toDataURL('image/png')
+
+      // Check if canvas is empty
+      const ctx = canvas.getContext('2d')
+      if (ctx) {
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+        const isCanvasEmpty = imageData.data.every(pixel => pixel === 0)
+        if (isCanvasEmpty) {
+          setError('Please draw your signature')
+          setIsLoading(false)
+          return
+        }
+      }
     } else {
       if (!typedSignature.trim()) {
         setError('Please enter your signature')
         setIsLoading(false)
         return
       }
-      signatureData = typedSignature
+      signatureData = typedSignature.trim()
     }
 
     const result = await createSignature({
@@ -179,6 +199,42 @@ export function SignatureCanvas({
       signatureType: signatureMode === 'draw' ? 'drawn' : 'typed',
       // ipAddress is optional and will default to '0.0.0.0' on server
       // We can't reliably get client IP from browser due to proxies/CDN
+    })
+
+    if (result.success && result.data) {
+      setSignatures([...signatures, result.data])
+
+      // Store signature for reuse if this is the first signature
+      if (!reusableSignature) {
+        setReusableSignature({
+          data: signatureData,
+          type: signatureMode,
+        })
+      }
+
+      setIsSignatureDialogOpen(false)
+      setSelectedField(null)
+      setTypedSignature('')
+      clearCanvas()
+      router.refresh()
+    } else {
+      setError(result.error || 'Failed to save signature')
+    }
+
+    setIsLoading(false)
+  }
+
+  const handleApplyPreviousSignature = async () => {
+    if (!selectedField || !reusableSignature) return
+
+    setIsLoading(true)
+    setError(null)
+
+    const result = await createSignature({
+      accessToken,
+      fieldId: selectedField.id,
+      signatureData: reusableSignature.data,
+      signatureType: reusableSignature.type === 'draw' ? 'drawn' : 'typed',
     })
 
     if (result.success && result.data) {
@@ -202,12 +258,13 @@ export function SignatureCanvas({
     const result = await completeSignature(accessToken)
 
     if (result.success) {
-      router.refresh()
+      // Redirect to success page instead of refreshing
+      // because the access token becomes inactive after completion
+      router.push('/sign/completed')
     } else {
       setError(result.error || 'Failed to complete signature')
+      setIsLoading(false)
     }
-
-    setIsLoading(false)
   }
 
   const handleDecline = async () => {
@@ -454,9 +511,57 @@ export function SignatureCanvas({
               {selectedField && getFieldLabel(selectedField.type)}
             </DialogTitle>
             <DialogDescription>
-              Create your signature by drawing or typing
+              {reusableSignature
+                ? 'Reuse your previous signature or create a new one'
+                : 'Create your signature by drawing or typing'}
             </DialogDescription>
           </DialogHeader>
+
+          {/* Option to reuse previous signature */}
+          {reusableSignature && (
+            <div className="p-4 bg-blue-50 border-2 border-blue-200 rounded-lg space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-blue-900">Previous Signature Available</p>
+                  <p className="text-xs text-blue-700 mt-1">
+                    Click below to use your previous signature for this field
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="flex-1 p-3 bg-white border rounded-lg">
+                  {reusableSignature.type === 'draw' ? (
+                    <img
+                      src={reusableSignature.data}
+                      alt="Previous signature"
+                      className="h-16 w-full object-contain"
+                    />
+                  ) : (
+                    <p className="text-2xl font-serif text-center">{reusableSignature.data}</p>
+                  )}
+                </div>
+                <Button
+                  onClick={handleApplyPreviousSignature}
+                  disabled={isLoading}
+                  className="shrink-0"
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Applying...
+                    </>
+                  ) : (
+                    'Use This Signature'
+                  )}
+                </Button>
+              </div>
+              <div className="pt-2 border-t border-blue-200">
+                <p className="text-xs text-blue-600 text-center">
+                  Or create a new signature below
+                </p>
+              </div>
+            </div>
+          )}
 
           <Tabs value={signatureMode} onValueChange={(v) => setSignatureMode(v as any)}>
             <TabsList className="grid w-full grid-cols-2">
