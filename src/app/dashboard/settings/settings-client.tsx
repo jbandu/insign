@@ -7,6 +7,19 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { ProfileEditForm } from '@/components/dashboard/profile-edit-form'
 import { PasswordChangeDialog } from '@/components/dashboard/password-change-dialog'
+import { Trash2, AlertTriangle, Loader2 } from 'lucide-react'
+import { deleteAllDataExceptUsers } from '@/app/actions/admin'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import { useRouter } from 'next/navigation'
 
 interface SettingsClientProps {
   user: {
@@ -24,7 +37,37 @@ interface SettingsClientProps {
 }
 
 export function SettingsClient({ user, organization }: SettingsClientProps) {
+  const router = useRouter()
   const [passwordDialogOpen, setPasswordDialogOpen] = useState(false)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
+  const [deleteSuccess, setDeleteSuccess] = useState(false)
+
+  const handleDeleteAllData = async () => {
+    setIsDeleting(true)
+    setDeleteError(null)
+    setDeleteSuccess(false)
+
+    try {
+      const result = await deleteAllDataExceptUsers()
+
+      if (result.success) {
+        setDeleteSuccess(true)
+        setDeleteDialogOpen(false)
+        // Refresh the page after a short delay
+        setTimeout(() => {
+          router.refresh()
+        }, 2000)
+      } else {
+        setDeleteError(result.error || 'Failed to delete data')
+      }
+    } catch (error) {
+      setDeleteError(error instanceof Error ? error.message : 'An unexpected error occurred')
+    } finally {
+      setIsDeleting(false)
+    }
+  }
 
   return (
     <>
@@ -156,12 +199,140 @@ export function SettingsClient({ user, organization }: SettingsClientProps) {
             </div>
           </CardContent>
         </Card>
+
+        {/* Danger Zone */}
+        <Card className="border-destructive">
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-destructive" />
+              <CardTitle className="text-destructive">Danger Zone</CardTitle>
+            </div>
+            <CardDescription>
+              Irreversible and destructive actions
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-4">
+              <div className="space-y-3">
+                <div>
+                  <h4 className="font-semibold text-sm mb-1">Delete All Data (Except Users)</h4>
+                  <p className="text-sm text-muted-foreground">
+                    This will permanently delete all documents, signatures, templates, and other data from your organization.
+                    <strong className="block mt-1 text-destructive">
+                      Users and organizations will be preserved, but all other data will be lost forever.
+                    </strong>
+                  </p>
+                </div>
+
+                {deleteSuccess && (
+                  <div className="p-3 bg-green-50 border border-green-200 rounded-md">
+                    <p className="text-sm text-green-800 font-medium">
+                      ✓ All data deleted successfully! Page will refresh shortly...
+                    </p>
+                  </div>
+                )}
+
+                {deleteError && (
+                  <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-md">
+                    <p className="text-sm text-destructive font-medium">
+                      Error: {deleteError}
+                    </p>
+                  </div>
+                )}
+
+                <Button
+                  variant="destructive"
+                  onClick={() => setDeleteDialogOpen(true)}
+                  disabled={isDeleting}
+                  className="w-full sm:w-auto"
+                >
+                  {isDeleting ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Deleting...
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Delete All Data
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+
+            <div className="text-xs text-muted-foreground space-y-1">
+              <p><strong>What will be deleted:</strong></p>
+              <ul className="list-disc list-inside space-y-0.5 ml-2">
+                <li>All documents and document versions</li>
+                <li>All signature requests and signatures</li>
+                <li>All templates and fields</li>
+                <li>All folders and tags</li>
+                <li>All API keys and webhooks</li>
+                <li>All audit logs and sessions</li>
+              </ul>
+              <p className="mt-2"><strong>What will be preserved:</strong></p>
+              <ul className="list-disc list-inside space-y-0.5 ml-2">
+                <li>Users and their profiles</li>
+                <li>Organizations and settings</li>
+              </ul>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       <PasswordChangeDialog
         open={passwordDialogOpen}
         onOpenChange={setPasswordDialogOpen}
       />
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-destructive">
+              <AlertTriangle className="h-5 w-5" />
+              Are you absolutely sure?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-3">
+              <p>
+                This action <strong className="text-destructive">cannot be undone</strong>. This will permanently delete:
+              </p>
+              <ul className="list-disc list-inside space-y-1 text-sm ml-2">
+                <li>All documents, signatures, and templates</li>
+                <li>All folders, tags, and permissions</li>
+                <li>All API keys, webhooks, and audit logs</li>
+                <li>All sessions and authentication data</li>
+              </ul>
+              <p className="font-semibold">
+                Only user accounts and organization settings will be preserved.
+              </p>
+              <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md mt-3">
+                <p className="text-sm text-yellow-800">
+                  <strong>⚠️ Warning:</strong> Make sure you have backups before proceeding!
+                </p>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteAllData}
+              disabled={isDeleting}
+              className="bg-destructive hover:bg-destructive/90"
+            >
+              {isDeleting ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                'Yes, Delete All Data'
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   )
 }
