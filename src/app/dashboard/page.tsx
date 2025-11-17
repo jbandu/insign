@@ -38,14 +38,18 @@ export default async function DashboardPage() {
   const [pendingCount] = await db
     .select({ count: count() })
     .from(signatureRequests)
-    .where(eq(signatureRequests.orgId, currentUser.orgId))
-    .where(eq(signatureRequests.status, 'sent'))
+    .where(and(
+      eq(signatureRequests.orgId, currentUser.orgId),
+      eq(signatureRequests.status, 'sent')
+    ))
 
   const [completedCount] = await db
     .select({ count: count() })
     .from(signatureRequests)
-    .where(eq(signatureRequests.orgId, currentUser.orgId))
-    .where(eq(signatureRequests.status, 'completed'))
+    .where(and(
+      eq(signatureRequests.orgId, currentUser.orgId),
+      eq(signatureRequests.status, 'completed')
+    ))
 
   const stats = {
     totalUsers: usersCount?.count || 0,
@@ -60,7 +64,7 @@ export default async function DashboardPage() {
     orderBy: desc(documents.createdAt),
     limit: 5,
     with: {
-      creator: {
+      createdByUser: {
         columns: {
           firstName: true,
           lastName: true,
@@ -170,11 +174,15 @@ export default async function DashboardPage() {
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium truncate">{doc.name}</p>
                       <p className="text-xs text-muted-foreground">
-                        {doc.creator?.firstName && doc.creator?.lastName
-                          ? `${doc.creator.firstName} ${doc.creator.lastName}`
-                          : doc.creator?.email || 'Unknown'}
-                        {' • '}
-                        {formatDistanceToNow(new Date(doc.createdAt), { addSuffix: true })}
+                        {doc.createdByUser?.firstName && doc.createdByUser?.lastName
+                          ? `${doc.createdByUser.firstName} ${doc.createdByUser.lastName}`
+                          : doc.createdByUser?.email || 'Unknown'}
+                        {doc.createdAt && (
+                          <>
+                            {' • '}
+                            {formatDistanceToNow(new Date(doc.createdAt), { addSuffix: true })}
+                          </>
+                        )}
                       </p>
                     </div>
                     <FileText className="h-4 w-4 text-muted-foreground flex-shrink-0 ml-2" />
@@ -207,6 +215,7 @@ export default async function DashboardPage() {
                     completed: 'bg-green-500',
                     declined: 'bg-red-500',
                     expired: 'bg-gray-400',
+                    cancelled: 'bg-gray-400',
                   }
 
                   return (
@@ -219,8 +228,12 @@ export default async function DashboardPage() {
                         <p className="text-sm font-medium truncate">{request.title}</p>
                         <p className="text-xs text-muted-foreground">
                           {request.participants.length} participant{request.participants.length !== 1 ? 's' : ''}
-                          {' • '}
-                          {formatDistanceToNow(new Date(request.createdAt), { addSuffix: true })}
+                          {request.createdAt && (
+                            <>
+                              {' • '}
+                              {formatDistanceToNow(new Date(request.createdAt), { addSuffix: true })}
+                            </>
+                          )}
                         </p>
                       </div>
                       <Badge
