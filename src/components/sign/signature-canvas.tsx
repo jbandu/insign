@@ -145,6 +145,49 @@ export function SignatureCanvas({
     setIsDrawing(false)
   }
 
+  // Touch event handlers for mobile devices
+  const startDrawingTouch = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    e.preventDefault() // Prevent scrolling while drawing
+    setIsDrawing(true)
+    const canvas = canvasRef.current
+    if (!canvas) return
+
+    const rect = canvas.getBoundingClientRect()
+    const touch = e.touches[0]
+    const x = touch.clientX - rect.left
+    const y = touch.clientY - rect.top
+
+    const ctx = canvas.getContext('2d')
+    if (ctx) {
+      ctx.beginPath()
+      ctx.moveTo(x, y)
+    }
+  }
+
+  const drawTouch = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    e.preventDefault() // Prevent scrolling while drawing
+    if (!isDrawing) return
+
+    const canvas = canvasRef.current
+    if (!canvas) return
+
+    const rect = canvas.getBoundingClientRect()
+    const touch = e.touches[0]
+    const x = touch.clientX - rect.left
+    const y = touch.clientY - rect.top
+
+    const ctx = canvas.getContext('2d')
+    if (ctx) {
+      ctx.lineTo(x, y)
+      ctx.stroke()
+    }
+  }
+
+  const stopDrawingTouch = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    e.preventDefault()
+    setIsDrawing(false)
+  }
+
   const clearCanvas = () => {
     const canvas = canvasRef.current
     if (!canvas) return
@@ -581,11 +624,15 @@ export function SignatureCanvas({
                   ref={canvasRef}
                   width={600}
                   height={200}
-                  className="w-full border rounded cursor-crosshair"
+                  className="w-full border rounded cursor-crosshair touch-none"
                   onMouseDown={startDrawing}
                   onMouseMove={draw}
                   onMouseUp={stopDrawing}
                   onMouseLeave={stopDrawing}
+                  onTouchStart={startDrawingTouch}
+                  onTouchMove={drawTouch}
+                  onTouchEnd={stopDrawingTouch}
+                  onTouchCancel={stopDrawingTouch}
                 />
               </div>
               <Button
