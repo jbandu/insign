@@ -38,14 +38,18 @@ export default async function DashboardPage() {
   const [pendingCount] = await db
     .select({ count: count() })
     .from(signatureRequests)
-    .where(eq(signatureRequests.orgId, currentUser.orgId))
-    .where(eq(signatureRequests.status, 'sent'))
+    .where(and(
+      eq(signatureRequests.orgId, currentUser.orgId),
+      eq(signatureRequests.status, 'sent')
+    ))
 
   const [completedCount] = await db
     .select({ count: count() })
     .from(signatureRequests)
-    .where(eq(signatureRequests.orgId, currentUser.orgId))
-    .where(eq(signatureRequests.status, 'completed'))
+    .where(and(
+      eq(signatureRequests.orgId, currentUser.orgId),
+      eq(signatureRequests.status, 'completed')
+    ))
 
   const stats = {
     totalUsers: usersCount?.count || 0,
