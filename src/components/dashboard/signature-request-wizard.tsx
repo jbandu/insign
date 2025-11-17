@@ -68,6 +68,7 @@ export function SignatureRequestWizard({ documents }: SignatureRequestWizardProp
     handleSubmit,
     control,
     watch,
+    setValue,
     formState: { errors },
   } = useForm<SignatureRequestInput>({
     resolver: zodResolver(signatureRequestSchema),
@@ -152,7 +153,8 @@ export function SignatureRequestWizard({ documents }: SignatureRequestWizardProp
       // Update form to use the converted PDF
       if (result.documentId) {
         setConvertedDocId(result.documentId)
-        // The form will automatically update via watch()
+        // Update the form's documentId to point to the new PDF
+        setValue('documentId', result.documentId)
         setError(null)
       }
     } catch (err) {
