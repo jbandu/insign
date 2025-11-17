@@ -88,12 +88,30 @@ export function SignatureCanvas({
     data: string
     type: 'draw' | 'type'
   } | null>(null)
-  const pdfWidth = 800
+  const [pdfWidth, setPdfWidth] = useState(800)
 
   const requiredFields = fields.filter(f => f.required)
   const completedFields = fields.filter(f =>
     signatures.some(s => s.fieldId === f.id)
   )
+
+  // Set responsive PDF width based on screen size
+  useEffect(() => {
+    const updatePdfWidth = () => {
+      const width = window.innerWidth
+      if (width < 640) { // mobile
+        setPdfWidth(width - 40) // Account for padding
+      } else if (width < 1024) { // tablet
+        setPdfWidth(600)
+      } else { // desktop
+        setPdfWidth(800)
+      }
+    }
+
+    updatePdfWidth()
+    window.addEventListener('resize', updatePdfWidth)
+    return () => window.removeEventListener('resize', updatePdfWidth)
+  }, [])
 
   useEffect(() => {
     if (isSignatureDialogOpen && signatureMode === 'draw' && canvasRef.current) {
@@ -108,14 +126,27 @@ export function SignatureCanvas({
     }
   }, [isSignatureDialogOpen, signatureMode])
 
+  // Helper function to get scaled coordinates
+  const getScaledCoordinates = (clientX: number, clientY: number) => {
+    const canvas = canvasRef.current
+    if (!canvas) return { x: 0, y: 0 }
+
+    const rect = canvas.getBoundingClientRect()
+    const scaleX = canvas.width / rect.width
+    const scaleY = canvas.height / rect.height
+
+    return {
+      x: (clientX - rect.left) * scaleX,
+      y: (clientY - rect.top) * scaleY,
+    }
+  }
+
   const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
     setIsDrawing(true)
     const canvas = canvasRef.current
     if (!canvas) return
 
-    const rect = canvas.getBoundingClientRect()
-    const x = e.clientX - rect.left
-    const y = e.clientY - rect.top
+    const { x, y } = getScaledCoordinates(e.clientX, e.clientY)
 
     const ctx = canvas.getContext('2d')
     if (ctx) {
@@ -130,9 +161,7 @@ export function SignatureCanvas({
     const canvas = canvasRef.current
     if (!canvas) return
 
-    const rect = canvas.getBoundingClientRect()
-    const x = e.clientX - rect.left
-    const y = e.clientY - rect.top
+    const { x, y } = getScaledCoordinates(e.clientX, e.clientY)
 
     const ctx = canvas.getContext('2d')
     if (ctx) {
@@ -152,10 +181,8 @@ export function SignatureCanvas({
     const canvas = canvasRef.current
     if (!canvas) return
 
-    const rect = canvas.getBoundingClientRect()
     const touch = e.touches[0]
-    const x = touch.clientX - rect.left
-    const y = touch.clientY - rect.top
+    const { x, y } = getScaledCoordinates(touch.clientX, touch.clientY)
 
     const ctx = canvas.getContext('2d')
     if (ctx) {
@@ -171,10 +198,8 @@ export function SignatureCanvas({
     const canvas = canvasRef.current
     if (!canvas) return
 
-    const rect = canvas.getBoundingClientRect()
     const touch = e.touches[0]
-    const x = touch.clientX - rect.left
-    const y = touch.clientY - rect.top
+    const { x, y } = getScaledCoordinates(touch.clientX, touch.clientY)
 
     const ctx = canvas.getContext('2d')
     if (ctx) {
@@ -347,16 +372,16 @@ export function SignatureCanvas({
       {/* Progress Card */}
       <Card>
         <CardContent className="pt-6">
-          <div className="flex items-center gap-2">
-            <div className="flex-1 bg-gray-200 rounded-full h-2">
+          <div className="flex items-center gap-3">
+            <div className="flex-1 bg-gray-200 rounded-full h-3">
               <div
-                className="bg-primary h-2 rounded-full transition-all"
+                className="bg-primary h-3 rounded-full transition-all"
                 style={{
                   width: `${requiredFields.length > 0 ? (completedFields.length / requiredFields.length) * 100 : 0}%`,
                 }}
               />
             </div>
-            <span className="text-sm font-medium">
+            <span className="text-sm sm:text-base font-medium whitespace-nowrap">
               {completedFields.length}/{requiredFields.length} Signed
             </span>
           </div>
@@ -366,9 +391,9 @@ export function SignatureCanvas({
       {/* Document with Signature Fields */}
       <Card>
         <CardHeader>
-          <CardTitle>Document & Signature Fields</CardTitle>
-          <CardDescription>
-            Click on the highlighted fields to add your signature
+          <CardTitle className="text-lg sm:text-xl">Document & Signature Fields</CardTitle>
+          <CardDescription className="text-sm">
+            Tap on the highlighted fields to add your signature
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -514,21 +539,20 @@ export function SignatureCanvas({
       {/* Action Buttons */}
       <Card>
         <CardContent className="pt-6">
-          <div className="flex gap-3">
+          <div className="flex flex-col sm:flex-row gap-3">
             <Button
               onClick={handleComplete}
               disabled={isLoading || completedFields.length < requiredFields.length}
-              className="flex-1"
-              size="lg"
+              className="flex-1 h-14 text-base"
             >
               {isLoading ? (
                 <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  <Loader2 className="h-5 w-5 mr-2 animate-spin" />
                   Processing...
                 </>
               ) : (
                 <>
-                  <CheckCircle2 className="h-4 w-4 mr-2" />
+                  <CheckCircle2 className="h-5 w-5 mr-2" />
                   Complete Signature
                 </>
               )}
@@ -537,9 +561,9 @@ export function SignatureCanvas({
               onClick={handleDecline}
               variant="destructive"
               disabled={isLoading}
-              size="lg"
+              className="h-14 text-base sm:w-auto"
             >
-              <XCircle className="h-4 w-4 mr-2" />
+              <XCircle className="h-5 w-5 mr-2" />
               Decline
             </Button>
           </div>
@@ -548,7 +572,7 @@ export function SignatureCanvas({
 
       {/* Signature Dialog */}
       <Dialog open={isSignatureDialogOpen} onOpenChange={setIsSignatureDialogOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto sm:max-h-none">
           <DialogHeader>
             <DialogTitle>
               {selectedField && getFieldLabel(selectedField.type)}
@@ -619,12 +643,16 @@ export function SignatureCanvas({
             </TabsList>
 
             <TabsContent value="draw" className="space-y-4">
-              <div className="border-2 border-dashed rounded-lg p-4 bg-white">
+              <div className="border-2 border-dashed rounded-lg p-2 sm:p-4 bg-white">
+                <p className="text-xs text-muted-foreground mb-2 text-center">
+                  Draw your signature using your finger or mouse
+                </p>
                 <canvas
                   ref={canvasRef}
                   width={600}
                   height={200}
-                  className="w-full border rounded cursor-crosshair touch-none"
+                  className="w-full border rounded cursor-crosshair touch-none bg-white"
+                  style={{ touchAction: 'none' }}
                   onMouseDown={startDrawing}
                   onMouseMove={draw}
                   onMouseUp={stopDrawing}
@@ -639,10 +667,10 @@ export function SignatureCanvas({
                 type="button"
                 variant="outline"
                 onClick={clearCanvas}
-                className="w-full"
+                className="w-full h-12 text-base"
               >
-                <Trash2 className="h-4 w-4 mr-2" />
-                Clear
+                <Trash2 className="h-5 w-5 mr-2" />
+                Clear Signature
               </Button>
             </TabsContent>
 
@@ -654,18 +682,18 @@ export function SignatureCanvas({
                   value={typedSignature}
                   onChange={(e) => setTypedSignature(e.target.value)}
                   placeholder={participant.fullName || participant.email}
-                  className="text-2xl font-serif"
+                  className="text-xl sm:text-2xl font-serif h-12 sm:h-14"
                 />
               </div>
               {typedSignature && (
-                <div className="p-8 border-2 rounded-lg bg-white">
-                  <p className="text-4xl font-serif text-center">{typedSignature}</p>
+                <div className="p-4 sm:p-8 border-2 rounded-lg bg-white">
+                  <p className="text-2xl sm:text-4xl font-serif text-center">{typedSignature}</p>
                 </div>
               )}
             </TabsContent>
           </Tabs>
 
-          <DialogFooter>
+          <DialogFooter className="flex-col sm:flex-row gap-2">
             <Button
               variant="outline"
               onClick={() => {
@@ -674,13 +702,18 @@ export function SignatureCanvas({
                 setTypedSignature('')
                 clearCanvas()
               }}
+              className="w-full sm:w-auto h-12 text-base"
             >
               Cancel
             </Button>
-            <Button onClick={handleSaveSignature} disabled={isLoading}>
+            <Button
+              onClick={handleSaveSignature}
+              disabled={isLoading}
+              className="w-full sm:w-auto h-12 text-base"
+            >
               {isLoading ? (
                 <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  <Loader2 className="h-5 w-5 mr-2 animate-spin" />
                   Saving...
                 </>
               ) : (
