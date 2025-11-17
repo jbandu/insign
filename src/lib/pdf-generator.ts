@@ -2,7 +2,7 @@
 
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib'
 import { db } from '@/lib/db'
-import { signatures, signatureFields, signatureRequests, documents } from '@/lib/db/schema'
+import { signatures, signatureFields, signatureRequests, documents, signatureAuditLogs } from '@/lib/db/schema'
 import { eq, inArray } from 'drizzle-orm'
 import { put } from '@vercel/blob'
 
@@ -90,11 +90,14 @@ export async function generateSignedPDF(requestId: string): Promise<{ success: b
     }
 
     // Process each signature
+    const embeddingErrors: string[] = []
+
     for (const sig of allSignatures) {
       const field = fieldMap.get(sig.fieldId)
 
       if (!field) {
         console.warn(`Field not found for signature ${sig.id}`)
+        embeddingErrors.push(`Field not found for signature ${sig.id}`)
         continue
       }
 
@@ -103,28 +106,69 @@ export async function generateSignedPDF(requestId: string): Promise<{ success: b
 
       if (pageIndex < 0 || pageIndex >= pdfDoc.getPageCount()) {
         console.warn(`Invalid page number ${field.pageNumber} for signature ${sig.id}`)
+        embeddingErrors.push(`Invalid page number ${field.pageNumber} for signature ${sig.id}`)
         continue
       }
 
       const page = pdfDoc.getPage(pageIndex)
       const pageHeight = page.getHeight()
+      const pageWidth = page.getWidth()
 
       // Convert coordinates (PDF coordinate system has origin at bottom-left)
       const pdfY = pageHeight - field.y - field.height
+
+      // Validate coordinates are within page bounds
+      if (field.x < 0 || field.y < 0 || field.x + field.width > pageWidth || pdfY < 0) {
+        console.warn(`Signature ${sig.id} coordinates out of bounds: x=${field.x}, y=${field.y}, pdfY=${pdfY}, page=${pageWidth}x${pageHeight}`)
+        embeddingErrors.push(`Signature ${sig.id} coordinates out of bounds`)
+      }
 
       if (sig.signatureType === 'drawn') {
         try {
           // Signature data is base64 PNG - need to remove data URL prefix if present
           let base64Data = sig.signatureData
+
+          console.log(`Processing drawn signature ${sig.id}, data length: ${base64Data?.length || 0}`)
+
+          if (!base64Data) {
+            throw new Error('Signature data is empty')
+          }
+
           if (base64Data.startsWith('data:image/png;base64,')) {
             base64Data = base64Data.replace('data:image/png;base64,', '')
+          } else if (base64Data.startsWith('data:')) {
+            // Handle other data URL formats
+            const base64Index = base64Data.indexOf('base64,')
+            if (base64Index !== -1) {
+              base64Data = base64Data.substring(base64Index + 7)
+            }
+          }
+
+          console.log(`After prefix removal, base64 length: ${base64Data.length}`)
+
+          // Validate base64 format
+          if (!/^[A-Za-z0-9+/]*={0,2}$/.test(base64Data)) {
+            throw new Error('Invalid base64 format')
           }
 
           // Convert base64 to bytes
           const imageBytes = Buffer.from(base64Data, 'base64')
+          console.log(`Decoded image bytes length: ${imageBytes.length}`)
+
+          if (imageBytes.length === 0) {
+            throw new Error('Decoded image is empty')
+          }
+
+          // Verify PNG signature (first 8 bytes should be: 137 80 78 71 13 10 26 10)
+          if (imageBytes.length < 8 ||
+              imageBytes[0] !== 137 || imageBytes[1] !== 80 ||
+              imageBytes[2] !== 78 || imageBytes[3] !== 71) {
+            throw new Error(`Invalid PNG signature. First bytes: [${Array.from(imageBytes.slice(0, 8)).join(', ')}]`)
+          }
 
           // Embed the PNG image
           const pngImage = await pdfDoc.embedPng(imageBytes)
+          console.log(`Successfully embedded PNG for signature ${sig.id}`)
 
           // Draw the image on the page
           page.drawImage(pngImage, {
@@ -133,15 +177,29 @@ export async function generateSignedPDF(requestId: string): Promise<{ success: b
             width: field.width,
             height: field.height,
           })
+
+          console.log(`Successfully drew signature ${sig.id} at (${field.x}, ${pdfY}) with size ${field.width}x${field.height}`)
         } catch (error) {
-          console.error(`Failed to embed signature image for ${sig.id}:`, error)
-          // Fall back to text if image fails
-          page.drawText(sig.signatureData.substring(0, 50), {
+          const errorMsg = error instanceof Error ? error.message : 'Unknown error'
+          console.error(`CRITICAL: Failed to embed signature image for ${sig.id}:`, error)
+          embeddingErrors.push(`Signature ${sig.id}: ${errorMsg}`)
+
+          // Draw error indicator on PDF instead of signature
+          page.drawRectangle({
             x: field.x,
+            y: pdfY,
+            width: field.width,
+            height: field.height,
+            borderColor: rgb(1, 0, 0),
+            borderWidth: 2,
+          })
+
+          page.drawText('[Signature Error]', {
+            x: field.x + 5,
             y: pdfY + field.height / 2,
-            size: 12,
+            size: 10,
             font: helvetica,
-            color: rgb(0, 0, 0),
+            color: rgb(1, 0, 0),
           })
         }
       } else if (sig.signatureType === 'typed') {
@@ -155,6 +213,8 @@ export async function generateSignedPDF(requestId: string): Promise<{ success: b
           font: timesRomanItalic,
           color: rgb(0, 0, 0),
         })
+
+        console.log(`Successfully drew typed signature ${sig.id}`)
       }
 
       // Optionally add timestamp below signature field
@@ -173,6 +233,19 @@ export async function generateSignedPDF(requestId: string): Promise<{ success: b
           color: rgb(0.5, 0.5, 0.5),
         })
       }
+    }
+
+    // If there were embedding errors, log them to audit trail
+    if (embeddingErrors.length > 0) {
+      console.error(`PDF generation completed with ${embeddingErrors.length} signature embedding errors:`, embeddingErrors)
+      await db.insert(signatureAuditLogs).values({
+        requestId,
+        action: 'pdf_signature_embedding_errors',
+        metadata: {
+          errors: embeddingErrors,
+          totalSignatures: allSignatures.length,
+        },
+      })
     }
 
     // Save the modified PDF
