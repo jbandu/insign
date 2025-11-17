@@ -4,11 +4,6 @@ import * as schema from '../../src/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import bcrypt from 'bcryptjs';
 
-// Only use in test environment
-if (process.env.NODE_ENV === 'production') {
-  throw new Error('DB helpers should not be used in production');
-}
-
 /**
  * Get database connection for tests
  */
@@ -38,7 +33,7 @@ export async function cleanupTestData(email: string) {
 
     // Find organization
     const org = await db.query.organizations.findFirst({
-      where: eq(schema.organizations.id, user.organizationId),
+      where: eq(schema.organizations.id, user.orgId),
     });
 
     if (!org) return;
@@ -48,41 +43,41 @@ export async function cleanupTestData(email: string) {
     await db.delete(schema.userSessions).where(eq(schema.userSessions.userId, user.id));
 
     // 2. Delete signature-related data
-    await db.delete(schema.signatureAuditLogs).where(eq(schema.signatureAuditLogs.organizationId, org.id));
-    await db.delete(schema.signatureCertificates).where(eq(schema.signatureCertificates.organizationId, org.id));
-    await db.delete(schema.signatures).where(eq(schema.signatures.organizationId, org.id));
-    await db.delete(schema.signatureFields).where(eq(schema.signatureFields.organizationId, org.id));
-    await db.delete(schema.signatureParticipants).where(eq(schema.signatureParticipants.organizationId, org.id));
-    await db.delete(schema.signatureRequests).where(eq(schema.signatureRequests.organizationId, org.id));
+    await db.delete(schema.signatureAuditLogs).where(eq(schema.signatureAuditLogs.orgId, org.id));
+    await db.delete(schema.signatureCertificates).where(eq(schema.signatureCertificates.orgId, org.id));
+    await db.delete(schema.signatures).where(eq(schema.signatures.orgId, org.id));
+    await db.delete(schema.signatureFields).where(eq(schema.signatureFields.orgId, org.id));
+    await db.delete(schema.signatureParticipants).where(eq(schema.signatureParticipants.orgId, org.id));
+    await db.delete(schema.signatureRequests).where(eq(schema.signatureRequests.orgId, org.id));
 
     // 3. Delete document-related data
-    await db.delete(schema.documentTagAssignments).where(eq(schema.documentTagAssignments.organizationId, org.id));
-    await db.delete(schema.documentTags).where(eq(schema.documentTags.organizationId, org.id));
-    await db.delete(schema.documentShares).where(eq(schema.documentShares.organizationId, org.id));
-    await db.delete(schema.documentPermissions).where(eq(schema.documentPermissions.organizationId, org.id));
-    await db.delete(schema.documentVersions).where(eq(schema.documentVersions.organizationId, org.id));
-    await db.delete(schema.documents).where(eq(schema.documents.organizationId, org.id));
-    await db.delete(schema.folders).where(eq(schema.folders.organizationId, org.id));
+    await db.delete(schema.documentTagAssignments).where(eq(schema.documentTagAssignments.orgId, org.id));
+    await db.delete(schema.documentTags).where(eq(schema.documentTags.orgId, org.id));
+    await db.delete(schema.documentShares).where(eq(schema.documentShares.orgId, org.id));
+    await db.delete(schema.documentPermissions).where(eq(schema.documentPermissions.orgId, org.id));
+    await db.delete(schema.documentVersions).where(eq(schema.documentVersions.orgId, org.id));
+    await db.delete(schema.documents).where(eq(schema.documents.orgId, org.id));
+    await db.delete(schema.folders).where(eq(schema.folders.orgId, org.id));
 
     // 4. Delete role permissions
     const orgRoles = await db.query.roles.findMany({
-      where: eq(schema.roles.organizationId, org.id),
+      where: eq(schema.roles.orgId, org.id),
     });
     for (const role of orgRoles) {
       await db.delete(schema.rolePermissions).where(eq(schema.rolePermissions.roleId, role.id));
     }
 
     // 5. Delete roles
-    await db.delete(schema.roles).where(eq(schema.roles.organizationId, org.id));
+    await db.delete(schema.roles).where(eq(schema.roles.orgId, org.id));
 
     // 6. Delete users
-    await db.delete(schema.users).where(eq(schema.users.organizationId, org.id));
+    await db.delete(schema.users).where(eq(schema.users.orgId, org.id));
 
     // 7. Delete storage quotas
-    await db.delete(schema.storageQuotas).where(eq(schema.storageQuotas.organizationId, org.id));
+    await db.delete(schema.storageQuotas).where(eq(schema.storageQuotas.orgId, org.id));
 
     // 8. Delete audit logs
-    await db.delete(schema.auditLogs).where(eq(schema.auditLogs.organizationId, org.id));
+    await db.delete(schema.auditLogs).where(eq(schema.auditLogs.orgId, org.id));
 
     // 9. Delete organization
     await db.delete(schema.organizations).where(eq(schema.organizations.id, org.id));
@@ -117,7 +112,7 @@ export async function createTestUser(userData: {
 
   // Create storage quota
   await db.insert(schema.storageQuotas).values({
-    organizationId: org.id,
+    orgId: org.id,
     totalQuota: 10737418240,
     usedStorage: 0,
   });
@@ -130,7 +125,7 @@ export async function createTestUser(userData: {
   if (!role) {
     [role] = await db.insert(schema.roles).values({
       name: userData.role || 'admin',
-      organizationId: org.id,
+      orgId: org.id,
       isSystemRole: true,
     }).returning();
   }
@@ -144,7 +139,7 @@ export async function createTestUser(userData: {
     password: hashedPassword,
     firstName: userData.firstName,
     lastName: userData.lastName,
-    organizationId: org.id,
+    orgId: org.id,
     roleId: role.id,
     status: 'active',
   }).returning();
@@ -160,7 +155,7 @@ export async function createTestFolder(organizationId: string, userId: string, n
 
   const [folder] = await db.insert(schema.folders).values({
     name,
-    organizationId,
+    orgId: organizationId,
     createdBy: userId,
     parentId: parentId || null,
   }).returning();
@@ -181,7 +176,7 @@ export async function createTestDocument(
 
   const [document] = await db.insert(schema.documents).values({
     name,
-    organizationId,
+    orgId: organizationId,
     uploadedBy: userId,
     folderId: folderId || null,
     fileType: 'application/pdf',
