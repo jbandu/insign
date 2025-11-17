@@ -131,7 +131,11 @@ export function SignatureRequestWizard({ documents }: SignatureRequestWizardProp
     setPlacedFields(placedFields.filter((_, i) => i !== index))
   }
 
-  const handleNext = async () => {
+  const handleNext = async (e?: React.MouseEvent<HTMLButtonElement>) => {
+    // Prevent any default form submission behavior
+    e?.preventDefault()
+    e?.stopPropagation()
+
     if (currentStep === 'details') {
       if (!selectedDocumentId) {
         setError('Please select a document')
@@ -167,6 +171,7 @@ export function SignatureRequestWizard({ documents }: SignatureRequestWizardProp
         return
       }
 
+      // Navigate to review step - DO NOT submit yet
       setCurrentStep('review')
     }
     setError(null)
