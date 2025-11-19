@@ -4,6 +4,10 @@ import { users, organizations } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
 import { SettingsClient } from './settings-client'
 
+// Force dynamic rendering - no caching
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export default async function SettingsPage() {
   const session = await auth()
 

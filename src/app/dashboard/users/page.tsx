@@ -5,6 +5,10 @@ import { UserPlus } from 'lucide-react'
 import { UsersList } from '@/components/dashboard/users-list'
 import Link from 'next/link'
 
+// Force dynamic rendering - no caching
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export default async function UsersPage() {
   const result = await getUsers()
 
