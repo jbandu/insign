@@ -4,7 +4,6 @@ import './globals.css'
 import { Providers } from './providers'
 import { cookies } from 'next/headers'
 import { defaultLocale, type Locale } from '@/lib/i18n-config'
-import { getMessages } from 'next-intl/server'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -23,7 +22,7 @@ export default async function RootLayout({
   const locale = (cookieStore.get('NEXT_LOCALE')?.value as Locale) || defaultLocale
 
   // Load messages for the current locale
-  const messages = await getMessages({ locale })
+  const messages = (await import(`../../messages/${locale}.json`)).default
 
   return (
     <html lang={locale}>
