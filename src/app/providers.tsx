@@ -4,9 +4,13 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useState } from 'react'
 import { SessionProvider } from 'next-auth/react'
 import { NextIntlClientProvider } from 'next-intl'
-import { useMessages } from 'next-intl'
 
-export function Providers({ children }: { children: React.ReactNode }) {
+interface ProvidersProps {
+  children: React.ReactNode
+  messages: any
+}
+
+export function Providers({ children, messages }: ProvidersProps) {
   const [queryClient] = useState(
     () =>
       new QueryClient({
@@ -18,8 +22,6 @@ export function Providers({ children }: { children: React.ReactNode }) {
         },
       })
   )
-
-  const messages = useMessages()
 
   return (
     <NextIntlClientProvider messages={messages}>
