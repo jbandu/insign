@@ -21,7 +21,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import { useRouter } from 'next/navigation'
 import { LanguageSelector } from '@/components/i18n/language-selector'
-import type { Locale } from '@/i18n'
+import type { Locale } from '@/lib/i18n-config'
 
 interface SettingsClientProps {
   user: {

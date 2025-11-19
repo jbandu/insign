@@ -5,7 +5,7 @@ import { db } from '@/lib/db'
 import { users } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
 import { cookies } from 'next/headers'
-import { locales, type Locale } from '@/i18n'
+import { locales, type Locale } from '@/lib/i18n-config'
 
 /**
  * Update user's language preference

@@ -11,7 +11,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { updateLanguagePreference, setLanguageCookie } from '@/app/actions/language'
-import { locales, localeNames, type Locale } from '@/i18n'
+import { locales, localeNames, type Locale } from '@/lib/i18n-config'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
