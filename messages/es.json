@@ -1,0 +1,214 @@
+{
+  "common": {
+    "appName": "InSign",
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "confirm": "Confirmar",
+    "back": "Atrás",
+    "next": "Siguiente",
+    "previous": "Anterior",
+    "submit": "Enviar",
+    "close": "Cerrar",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "export": "Exportar",
+    "import": "Importar",
+    "download": "Descargar",
+    "upload": "Subir",
+    "yes": "Sí",
+    "no": "No",
+    "select": "Seleccionar",
+    "selectLanguage": "Seleccionar Idioma"
+  },
+  "auth": {
+    "signIn": "Iniciar Sesión",
+    "signOut": "Cerrar Sesión",
+    "signUp": "Registrarse",
+    "email": "Correo Electrónico",
+    "password": "Contraseña",
+    "confirmPassword": "Confirmar Contraseña",
+    "forgotPassword": "¿Olvidaste tu contraseña?",
+    "rememberMe": "Recuérdame",
+    "noAccount": "¿No tienes una cuenta?",
+    "haveAccount": "¿Ya tienes una cuenta?",
+    "signInToContinue": "Inicia sesión para continuar",
+    "createAccount": "Crear Cuenta",
+    "welcomeBack": "¡Bienvenido de nuevo!",
+    "getStarted": "Comienza con {appName}"
+  },
+  "navigation": {
+    "dashboard": "Panel",
+    "documents": "Documentos",
+    "signatures": "Firmas",
+    "templates": "Plantillas",
+    "settings": "Configuración",
+    "profile": "Perfil",
+    "help": "Ayuda",
+    "logout": "Salir"
+  },
+  "landing": {
+    "hero": {
+      "title": "Firmas Digitales Simplificadas",
+      "subtitle": "Firma, envía y gestiona documentos de forma segura con nuestra plataforma de firma electrónica de nivel empresarial",
+      "cta": "Comenzar Gratis",
+      "learnMore": "Saber Más"
+    },
+    "features": {
+      "title": "Todo Lo Que Necesitas",
+      "subtitle": "Funciones poderosas para empresas modernas",
+      "easyToUse": "Fácil de Usar",
+      "easyToUseDesc": "Interfaz intuitiva diseñada para todos",
+      "secure": "Seguro y Conforme",
+      "secureDesc": "Cifrado de nivel bancario y cumplimiento legal",
+      "mobile": "Compatible con Móviles",
+      "mobileDesc": "Firma documentos en cualquier lugar, en cualquier momento",
+      "tracking": "Seguimiento en Tiempo Real",
+      "trackingDesc": "Monitorea el estado del documento en tiempo real"
+    },
+    "pricing": {
+      "title": "Precios Simples y Transparentes",
+      "subtitle": "Elige el plan que se adapte a tus necesidades",
+      "free": "Gratis",
+      "starter": "Inicial",
+      "business": "Negocios",
+      "enterprise": "Empresa",
+      "perMonth": "por mes",
+      "selectPlan": "Seleccionar Plan"
+    },
+    "cta": {
+      "title": "¿Listo para Comenzar?",
+      "subtitle": "Únete a miles de empresas que usan {appName}",
+      "button": "Iniciar Prueba Gratuita"
+    }
+  },
+  "settings": {
+    "title": "Configuración",
+    "subtitle": "Administra tu organización y configuración de cuenta",
+    "organization": {
+      "title": "Configuración de Organización",
+      "subtitle": "Administra los detalles y preferencias de tu organización",
+      "name": "Nombre de la Organización",
+      "domain": "Dominio",
+      "subscriptionTier": "Nivel de Suscripción",
+      "status": "Estado",
+      "update": "Actualizar Organización",
+      "contactSupport": "Contacta con soporte para actualizar la configuración de la organización"
+    },
+    "profile": {
+      "title": "Configuración de Perfil",
+      "subtitle": "Administra los detalles de tu cuenta personal",
+      "firstName": "Nombre",
+      "lastName": "Apellido",
+      "email": "Correo Electrónico",
+      "language": "Idioma",
+      "updateProfile": "Actualizar Perfil"
+    },
+    "security": {
+      "title": "Seguridad",
+      "subtitle": "Administra tu contraseña y configuración de seguridad",
+      "password": "Contraseña",
+      "changePassword": "Cambiar Contraseña",
+      "lastChanged": "Último cambio: {date}",
+      "twoFactor": "Autenticación de Dos Factores",
+      "twoFactorDesc": "Agrega una capa adicional de seguridad a tu cuenta",
+      "enable2FA": "Habilitar 2FA",
+      "requires2FASetup": "La configuración de 2FA requiere configuración adicional"
+    },
+    "storage": {
+      "title": "Uso de Almacenamiento",
+      "subtitle": "Ver el uso de almacenamiento de tu organización",
+      "used": "Usado",
+      "remaining": "{amount} restante"
+    },
+    "language": {
+      "title": "Preferencias de Idioma",
+      "subtitle": "Elige tu idioma preferido",
+      "select": "Seleccionar Idioma",
+      "english": "Inglés (English)",
+      "spanish": "Español",
+      "success": "Idioma actualizado exitosamente",
+      "error": "Error al actualizar el idioma"
+    },
+    "danger": {
+      "title": "Zona de Peligro",
+      "subtitle": "Acciones irreversibles y destructivas",
+      "deleteData": {
+        "title": "Eliminar Todos los Datos (Excepto Usuarios)",
+        "description": "Esto eliminará permanentemente todos los documentos, firmas, plantillas y otros datos de tu organización.",
+        "warning": "Los usuarios y organizaciones se conservarán, pero todos los demás datos se perderán para siempre.",
+        "button": "Eliminar Todos los Datos",
+        "deleting": "Eliminando...",
+        "success": "✓ ¡Todos los datos eliminados exitosamente! La página se actualizará en breve...",
+        "confirmTitle": "¿Estás absolutamente seguro?",
+        "confirmDescription": "Esta acción no se puede deshacer. Esto eliminará permanentemente:",
+        "confirmWarning": "⚠️ Advertencia: ¡Asegúrate de tener copias de seguridad antes de continuar!",
+        "confirmButton": "Sí, Eliminar Todos los Datos",
+        "whatDeleted": "Qué se eliminará:",
+        "whatPreserved": "Qué se conservará:",
+        "items": {
+          "documents": "Todos los documentos y versiones de documentos",
+          "signatures": "Todas las solicitudes de firma y firmas",
+          "templates": "Todas las plantillas y campos",
+          "folders": "Todas las carpetas y etiquetas",
+          "apiKeys": "Todas las claves API y webhooks",
+          "auditLogs": "Todos los registros de auditoría y sesiones",
+          "users": "Usuarios y sus perfiles",
+          "organizations": "Organizaciones y configuraciones"
+        }
+      }
+    }
+  },
+  "signatures": {
+    "title": "Firmas",
+    "newRequest": "Nueva Solicitud de Firma",
+    "signDocument": "Firmar Documento",
+    "completed": "Completado",
+    "pending": "Pendiente",
+    "declined": "Rechazado",
+    "viewDocument": "Ver Documento",
+    "downloadSigned": "Descargar Documento Firmado",
+    "status": "Estado",
+    "participants": "Participantes",
+    "createdAt": "Creado el",
+    "completedAt": "Completado el",
+    "draw": "Dibujar",
+    "type": "Escribir",
+    "clear": "Limpiar",
+    "saveSignature": "Guardar Firma",
+    "clickToSign": "Haz clic para firmar",
+    "signed": "Firmado",
+    "completeSignature": "Completar Firma",
+    "decline": "Rechazar",
+    "processing": "Procesando..."
+  },
+  "documents": {
+    "title": "Documentos",
+    "uploadDocument": "Subir Documento",
+    "noDocuments": "No se encontraron documentos",
+    "name": "Nombre",
+    "size": "Tamaño",
+    "uploadedAt": "Subido el",
+    "actions": "Acciones",
+    "delete": "Eliminar",
+    "share": "Compartir",
+    "version": "Versión"
+  },
+  "errors": {
+    "generic": "Algo salió mal. Por favor, inténtalo de nuevo.",
+    "unauthorized": "No estás autorizado para realizar esta acción.",
+    "notFound": "No se encontró el recurso solicitado.",
+    "networkError": "Error de red. Por favor, verifica tu conexión.",
+    "validationError": "Por favor, verifica tu entrada e inténtalo de nuevo."
+  },
+  "success": {
+    "saved": "Guardado exitosamente",
+    "deleted": "Eliminado exitosamente",
+    "updated": "Actualizado exitosamente",
+    "sent": "Enviado exitosamente"
+  }
+}
