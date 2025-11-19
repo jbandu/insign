@@ -53,22 +53,60 @@
   },
   "landing": {
     "hero": {
-      "title": "Digital Signatures Made Simple",
-      "subtitle": "Sign, send, and manage documents securely with our enterprise-grade e-signature platform",
-      "cta": "Get Started Free",
-      "learnMore": "Learn More"
+      "badge": "Enterprise-ready internal operations platform",
+      "title": "Welcome to",
+      "subtitle": "Streamline Your Internal Operations",
+      "description": "Replace multiple SaaS tools with one unified platform. Manage documents, signatures, users, and workflows all in one place.",
+      "ctaPrimary": "Start Free Trial",
+      "ctaSecondary": "Sign In"
+    },
+    "stats": {
+      "secure": "Secure",
+      "storage": "Free Storage",
+      "support": "Support",
+      "signatures": "Signatures"
     },
     "features": {
-      "title": "Everything You Need",
-      "subtitle": "Powerful features for modern businesses",
-      "easyToUse": "Easy to Use",
-      "easyToUseDesc": "Intuitive interface designed for everyone",
-      "secure": "Secure & Compliant",
-      "secureDesc": "Bank-level encryption and legal compliance",
-      "mobile": "Mobile Friendly",
-      "mobileDesc": "Sign documents anywhere, anytime",
-      "tracking": "Real-time Tracking",
-      "trackingDesc": "Monitor document status in real-time"
+      "authentication": {
+        "title": "Unified Authentication",
+        "description": "Single sign-on with MFA support, SSO integration, and role-based access control"
+      },
+      "documents": {
+        "title": "Document Management",
+        "description": "Upload, organize, search, and share documents with advanced permissions"
+      },
+      "signatures": {
+        "title": "E-Signature Workflows",
+        "description": "Create, send, and track digital signatures with sequential or parallel workflows"
+      },
+      "users": {
+        "title": "User Management",
+        "description": "Manage teams, roles, and permissions with multi-tenant organization support"
+      },
+      "security": {
+        "title": "Enterprise Security",
+        "description": "Bank-level encryption, audit logs, and compliance-ready infrastructure"
+      },
+      "analytics": {
+        "title": "Analytics & Reports",
+        "description": "Real-time insights, usage analytics, and comprehensive reporting dashboard"
+      }
+    },
+    "howItWorks": {
+      "title": "How It Works",
+      "subtitle": "Get started in minutes with our simple onboarding process",
+      "step1": {
+        "title": "Create Account",
+        "description": "Sign up in seconds with your email address"
+      },
+      "step2": {
+        "title": "Set Up Organization",
+        "description": "Configure your workspace and invite team members"
+      },
+      "step3": {
+        "title": "Start Working",
+        "description": "Upload documents, send signature requests, and manage workflows"
+      }
     },
     "pricing": {
       "title": "Simple, Transparent Pricing",

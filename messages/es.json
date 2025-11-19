@@ -53,22 +53,60 @@
   },
   "landing": {
     "hero": {
-      "title": "Firmas Digitales Simplificadas",
-      "subtitle": "Firma, envía y gestiona documentos de forma segura con nuestra plataforma de firma electrónica de nivel empresarial",
-      "cta": "Comenzar Gratis",
-      "learnMore": "Saber Más"
+      "badge": "Plataforma de operaciones internas lista para empresas",
+      "title": "Bienvenido a",
+      "subtitle": "Optimiza Tus Operaciones Internas",
+      "description": "Reemplaza múltiples herramientas SaaS con una plataforma unificada. Gestiona documentos, firmas, usuarios y flujos de trabajo en un solo lugar.",
+      "ctaPrimary": "Iniciar Prueba Gratuita",
+      "ctaSecondary": "Iniciar Sesión"
+    },
+    "stats": {
+      "secure": "Seguro",
+      "storage": "Almacenamiento Gratis",
+      "support": "Soporte",
+      "signatures": "Firmas"
     },
     "features": {
-      "title": "Todo Lo Que Necesitas",
-      "subtitle": "Funciones poderosas para empresas modernas",
-      "easyToUse": "Fácil de Usar",
-      "easyToUseDesc": "Interfaz intuitiva diseñada para todos",
-      "secure": "Seguro y Conforme",
-      "secureDesc": "Cifrado de nivel bancario y cumplimiento legal",
-      "mobile": "Compatible con Móviles",
-      "mobileDesc": "Firma documentos en cualquier lugar, en cualquier momento",
-      "tracking": "Seguimiento en Tiempo Real",
-      "trackingDesc": "Monitorea el estado del documento en tiempo real"
+      "authentication": {
+        "title": "Autenticación Unificada",
+        "description": "Inicio de sesión único con soporte MFA, integración SSO y control de acceso basado en roles"
+      },
+      "documents": {
+        "title": "Gestión de Documentos",
+        "description": "Carga, organiza, busca y comparte documentos con permisos avanzados"
+      },
+      "signatures": {
+        "title": "Flujos de Firma Electrónica",
+        "description": "Crea, envía y rastrea firmas digitales con flujos de trabajo secuenciales o paralelos"
+      },
+      "users": {
+        "title": "Gestión de Usuarios",
+        "description": "Administra equipos, roles y permisos con soporte de organización multi-inquilino"
+      },
+      "security": {
+        "title": "Seguridad Empresarial",
+        "description": "Cifrado de nivel bancario, registros de auditoría e infraestructura lista para cumplimiento"
+      },
+      "analytics": {
+        "title": "Análisis e Informes",
+        "description": "Información en tiempo real, análisis de uso y panel de informes completo"
+      }
+    },
+    "howItWorks": {
+      "title": "Cómo Funciona",
+      "subtitle": "Comienza en minutos con nuestro simple proceso de incorporación",
+      "step1": {
+        "title": "Crear Cuenta",
+        "description": "Regístrate en segundos con tu dirección de correo electrónico"
+      },
+      "step2": {
+        "title": "Configurar Organización",
+        "description": "Configura tu espacio de trabajo e invita a miembros del equipo"
+      },
+      "step3": {
+        "title": "Comenzar a Trabajar",
+        "description": "Carga documentos, envía solicitudes de firma y gestiona flujos de trabajo"
+      }
     },
     "pricing": {
       "title": "Precios Simples y Transparentes",
