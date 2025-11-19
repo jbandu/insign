@@ -16,12 +16,8 @@ import { createSignatureField } from '@/app/actions/signature-fields'
 import { convertDocumentToPDF } from '@/app/actions/documents-convert'
 import { Loader2, ArrowLeft, ArrowRight, Plus, Trash2, Check, FileText, Users, Pencil, Send, User, RefreshCw } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { Document, Page, pdfjs } from 'react-pdf'
-
-// Configure PDF.js worker - use local copy from public directory
-if (typeof window !== 'undefined') {
-  pdfjs.GlobalWorkerOptions.workerSrc = '/pdf-worker/pdf.worker.min.mjs'
-}
+import { Document, Page } from 'react-pdf'
+import '@/lib/pdf-config' // Import centralized PDF configuration
 
 interface Document {
   id: string
@@ -75,6 +71,7 @@ export function SignatureRequestWizard({ documents }: SignatureRequestWizardProp
   } = useForm<SignatureRequestInput>({
     resolver: zodResolver(signatureRequestSchema),
     defaultValues: {
+      title: 'Please review the contents and sign',
       workflowType: 'sequential',
       participants: [{ email: '', fullName: '', role: 'signer', orderIndex: 0 }],
     },
@@ -305,7 +302,6 @@ export function SignatureRequestWizard({ documents }: SignatureRequestWizardProp
 
       // Success! Redirect to signature requests list
       router.push('/dashboard/signatures')
-      router.refresh()
     } catch (err) {
       setError('An unexpected error occurred')
     } finally {
@@ -470,7 +466,7 @@ export function SignatureRequestWizard({ documents }: SignatureRequestWizardProp
                 <Input
                   id="title"
                   {...register('title')}
-                  placeholder="Employment Agreement Signature"
+                  placeholder="e.g., NDA Agreement, Employment Contract"
                   disabled={isLoading}
                 />
                 {errors.title && (

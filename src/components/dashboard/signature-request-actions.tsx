@@ -68,7 +68,6 @@ export function SignatureRequestActions({ request }: SignatureRequestActionsProp
 
     if (result.success) {
       router.push('/dashboard/signatures')
-      router.refresh()
     } else {
       setError(result.error || 'Failed to delete request')
     }

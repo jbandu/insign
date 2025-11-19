@@ -1,9 +1,21 @@
+import dynamic from 'next/dynamic'
 import { getSigningSession } from '@/app/actions/sign'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { SignatureCanvas } from '@/components/sign/signature-canvas'
-import { FileSignature, CheckCircle2, XCircle } from 'lucide-react'
-import { notFound } from 'next/navigation'
+import { FileSignature, CheckCircle2, XCircle, Loader2 } from 'lucide-react'
+
+// Dynamically import SignatureCanvas to avoid SSR issues with react-pdf
+const SignatureCanvas = dynamic(
+  () => import('@/components/sign/signature-canvas').then(mod => ({ default: mod.SignatureCanvas })),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex items-center justify-center p-12">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    )
+  }
+)
 
 interface SignPageProps {
   params: {
