@@ -38,6 +38,11 @@ export function LanguageSelector({
   const [selectedLanguage, setSelectedLanguage] = useState<Locale>(currentLanguage)
 
   const handleLanguageChange = async (language: Locale) => {
+    // Don't do anything if selecting the same language
+    if (language === currentLanguage) {
+      return
+    }
+
     setSelectedLanguage(language)
 
     startTransition(async () => {
@@ -50,8 +55,9 @@ export function LanguageSelector({
           // Call optional callback
           onLanguageChange?.(language)
 
-          // Refresh the page to apply new language
-          router.refresh()
+          // Use window.location.reload() for smoother transition
+          // This prevents flickering better than router.refresh()
+          window.location.reload()
         } else {
           console.error('Failed to update language:', result.error)
           // Revert selection on error
