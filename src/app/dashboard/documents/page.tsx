@@ -9,6 +9,10 @@ import { DocumentSearch } from '@/components/dashboard/document-search'
 import { ManageTagsDialog } from '@/components/dashboard/manage-tags-dialog'
 import Link from 'next/link'
 
+// Force dynamic rendering - no caching
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export default async function DocumentsPage({
   searchParams,
 }: {

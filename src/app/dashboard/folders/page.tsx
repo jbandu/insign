@@ -5,6 +5,10 @@ import { FolderPlus } from 'lucide-react'
 import { FoldersList } from '@/components/dashboard/folders-list'
 import Link from 'next/link'
 
+// Force dynamic rendering - no caching
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export default async function FoldersPage() {
   const result = await getFolders()
 

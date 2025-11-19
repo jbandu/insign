@@ -6,6 +6,10 @@ import { FileSignature, Plus } from 'lucide-react'
 import { SignatureRequestsList } from '@/components/dashboard/signature-requests-list'
 import Link from 'next/link'
 
+// Force dynamic rendering - no caching
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export default async function SignaturesPage() {
   const result = await getSignatureRequests()
 
