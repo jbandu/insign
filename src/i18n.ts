@@ -1,6 +1,14 @@
 import { getRequestConfig } from 'next-intl/server'
 import { cookies } from 'next/headers'
 import { defaultLocale, type Locale } from '@/lib/i18n-config'
+import enMessages from '../messages/en.json'
+import esMessages from '../messages/es.json'
+
+// Static messages map for production builds
+const messagesMap = {
+  en: enMessages,
+  es: esMessages,
+} as const
 
 export default getRequestConfig(async () => {
   // Get locale from cookie or use default
@@ -9,6 +17,6 @@ export default getRequestConfig(async () => {
 
   return {
     locale,
-    messages: (await import(`../messages/${locale}.json`)).default,
+    messages: messagesMap[locale] || messagesMap[defaultLocale],
   }
 })
