@@ -178,6 +178,16 @@ export async function generateSignedPDF(requestId: string): Promise<{ success: b
             height: field.height,
           })
 
+          // Draw a border box around the signature
+          page.drawRectangle({
+            x: field.x,
+            y: pdfY,
+            width: field.width,
+            height: field.height,
+            borderColor: rgb(0, 0, 0),
+            borderWidth: 1,
+          })
+
           console.log(`Successfully drew signature ${sig.id} at (${field.x}, ${pdfY}) with size ${field.width}x${field.height}`)
         } catch (error) {
           const errorMsg = error instanceof Error ? error.message : 'Unknown error'
@@ -212,6 +222,16 @@ export async function generateSignedPDF(requestId: string): Promise<{ success: b
           size: fontSize,
           font: timesRomanItalic,
           color: rgb(0, 0, 0),
+        })
+
+        // Draw a border box around the typed signature
+        page.drawRectangle({
+          x: field.x,
+          y: pdfY,
+          width: field.width,
+          height: field.height,
+          borderColor: rgb(0, 0, 0),
+          borderWidth: 1,
         })
 
         console.log(`Successfully drew typed signature ${sig.id}`)

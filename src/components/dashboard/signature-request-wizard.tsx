@@ -60,6 +60,7 @@ export function SignatureRequestWizard({ documents }: SignatureRequestWizardProp
   const [numPages, setNumPages] = useState<number>(0)
   const [currentPage, setCurrentPage] = useState(1)
   const [pdfWidth, setPdfWidth] = useState<number>(800)
+  const [actualPageDimensions, setActualPageDimensions] = useState<{ width: number; height: number } | null>(null)
   const [isConverting, setIsConverting] = useState(false)
   const [convertedDocId, setConvertedDocId] = useState<string | null>(null)
   const [convertedPdfUrl, setConvertedPdfUrl] = useState<string | null>(null)
@@ -113,10 +114,21 @@ export function SignatureRequestWizard({ documents }: SignatureRequestWizardProp
 
   const handleDocumentClick = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect()
-    const x = e.clientX - rect.left
-    const y = e.clientY - rect.top
+    const displayX = e.clientX - rect.left
+    const displayY = e.clientY - rect.top
 
     const fieldConfig = fieldTypes.find(ft => ft.value === selectedFieldType)!
+
+    // Calculate the scale factor between display size and actual PDF size
+    // If we don't have actual dimensions yet, use 1:1 scale (will be updated when PDF loads)
+    const scaleX = actualPageDimensions ? actualPageDimensions.width / rect.width : 1
+    const scaleY = actualPageDimensions ? actualPageDimensions.height / rect.height : 1
+
+    // Scale coordinates to actual PDF dimensions
+    const x = displayX * scaleX
+    const y = displayY * scaleY
+    const width = fieldConfig.width * scaleX
+    const height = fieldConfig.height * scaleY
 
     const newField: PlacedField = {
       participantIndex: selectedParticipantIndex,
@@ -124,8 +136,8 @@ export function SignatureRequestWizard({ documents }: SignatureRequestWizardProp
       pageNumber: currentPage,
       x,
       y,
-      width: fieldConfig.width,
-      height: fieldConfig.height,
+      width,
+      height,
       label: `${participants[selectedParticipantIndex]?.fullName || participants[selectedParticipantIndex]?.email} - ${fieldConfig.label}`,
     }
 
@@ -368,13 +380,15 @@ export function SignatureRequestWizard({ documents }: SignatureRequestWizardProp
                 <Label htmlFor="documentId">Select Document *</Label>
                 <select
                   id="documentId"
-                  {...register('documentId')}
                   disabled={isLoading || isConverting}
                   className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  onChange={(e) => {
-                    // Reset converted doc ID when selection changes
-                    setConvertedDocId(null)
-                  }}
+                  {...register('documentId', {
+                    onChange: (e) => {
+                      // Reset converted doc ID when selection changes
+                      setConvertedDocId(null)
+                      setConvertedPdfUrl(null)
+                    }
+                  })}
                 >
                   <option value="">Choose a document...</option>
                   {documents.map((doc) => {
@@ -739,6 +753,13 @@ export function SignatureRequestWizard({ documents }: SignatureRequestWizardProp
                           width={pdfWidth}
                           renderTextLayer={false}
                           renderAnnotationLayer={false}
+                          onLoadSuccess={(page) => {
+                            // Store actual PDF page dimensions for coordinate scaling
+                            setActualPageDimensions({
+                              width: page.originalWidth,
+                              height: page.originalHeight,
+                            })
+                          }}
                           onLoadError={(error) => {
                             console.error('Page load error:', error)
                           }}
@@ -748,6 +769,16 @@ export function SignatureRequestWizard({ documents }: SignatureRequestWizardProp
                   {placedFields.filter(f => f.pageNumber === currentPage).map((field, index) => {
                     const fieldType = fieldTypes.find(ft => ft.value === field.type)!
                     const actualIndex = placedFields.indexOf(field)
+
+                    // Scale field coordinates from PDF dimensions back to display dimensions
+                    const displayScaleX = actualPageDimensions ? pdfWidth / actualPageDimensions.width : 1
+                    const displayScaleY = actualPageDimensions ? (pdfWidth * actualPageDimensions.height / actualPageDimensions.width) / actualPageDimensions.height : 1
+
+                    const displayX = field.x * displayScaleX
+                    const displayY = field.y * displayScaleY
+                    const displayWidth = field.width * displayScaleX
+                    const displayHeight = field.height * displayScaleY
+
                     return (
                       <div
                         key={index}
@@ -758,10 +789,10 @@ export function SignatureRequestWizard({ documents }: SignatureRequestWizardProp
                           'bg-opacity-20'
                         )}
                         style={{
-                          left: field.x,
-                          top: field.y,
-                          width: field.width,
-                          height: field.height,
+                          left: displayX,
+                          top: displayY,
+                          width: displayWidth,
+                          height: displayHeight,
                         }}
                         onClick={(e) => e.stopPropagation()}
                       >
