@@ -755,9 +755,15 @@ export function SignatureRequestWizard({ documents }: SignatureRequestWizardProp
                           renderAnnotationLayer={false}
                           onLoadSuccess={(page) => {
                             // Store actual PDF page dimensions for coordinate scaling
-                            setActualPageDimensions({
-                              width: page.originalWidth,
-                              height: page.originalHeight,
+                            // Only update if dimensions have changed to prevent infinite loop
+                            setActualPageDimensions((prev) => {
+                              if (prev?.width === page.originalWidth && prev?.height === page.originalHeight) {
+                                return prev
+                              }
+                              return {
+                                width: page.originalWidth,
+                                height: page.originalHeight,
+                              }
                             })
                           }}
                           onLoadError={(error) => {
