@@ -1,4 +1,6 @@
 import Link from 'next/link'
+import { cookies } from 'next/headers'
+import { getTranslations } from 'next-intl/server'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import {
@@ -12,8 +14,17 @@ import {
   BarChart3,
   FolderKanban
 } from 'lucide-react'
+import { LanguageSelector } from '@/components/i18n/language-selector'
+import { defaultLocale, type Locale } from '@/lib/i18n-config'
 
-export default function Home() {
+export default async function Home() {
+  // Get current language from cookie
+  const cookieStore = await cookies()
+  const locale = (cookieStore.get('NEXT_LOCALE')?.value as Locale) || defaultLocale
+
+  // Get translations
+  const t = await getTranslations({ locale, namespace: 'auth' })
+
   return (
     <main className="flex min-h-screen flex-col">
       {/* Header */}
@@ -24,11 +35,16 @@ export default function Home() {
             <h2 className="text-2xl font-bold text-primary">Insign</h2>
           </div>
           <div className="flex items-center gap-4">
+            <LanguageSelector
+              currentLanguage={locale}
+              isAuthenticated={false}
+              variant="dropdown"
+            />
             <Button variant="ghost" asChild>
-              <Link href="/auth/signin">Sign In</Link>
+              <Link href="/auth/signin">{t('signIn')}</Link>
             </Button>
             <Button asChild>
-              <Link href="/auth/signup">Get Started</Link>
+              <Link href="/auth/signup">{t('signUp')}</Link>
             </Button>
           </div>
         </div>
