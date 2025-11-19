@@ -33,9 +33,12 @@ jobs:
         run: npm ci
 
       - name: Install Playwright Browsers
+        # Only install Chromium for CI to speed up tests
+        # Playwright config is set to use only Chromium when CI=true
         run: npx playwright install --with-deps chromium
 
       - name: Run E2E tests against Vercel deployment
+        # CI=true ensures Playwright runs only Chromium (see playwright.config.ts)
         run: npm run test:e2e
         env:
           CI: true
