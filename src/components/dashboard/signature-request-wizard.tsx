@@ -17,7 +17,7 @@ import { convertDocumentToPDF } from '@/app/actions/documents-convert'
 import { Loader2, ArrowLeft, ArrowRight, Plus, Trash2, Check, FileText, Users, Pencil, Send, User, RefreshCw } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Document, Page } from 'react-pdf'
-import '@/lib/pdf-config' // Import centralized PDF configuration
+import { pdfjs } from '@/lib/pdf-config' // Import centralized PDF configuration
 
 interface Document {
   id: string

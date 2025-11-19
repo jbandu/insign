@@ -20,7 +20,7 @@ import {
 } from '@/components/ui/dialog'
 import { Document, Page } from 'react-pdf'
 import { cn } from '@/lib/utils'
-import '@/lib/pdf-config' // Import centralized PDF configuration
+import { pdfjs } from '@/lib/pdf-config' // Import centralized PDF configuration
 
 interface Document {
   id: string
