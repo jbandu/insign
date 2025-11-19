@@ -213,6 +213,7 @@ export function SignatureRequestWizard({ documents }: SignatureRequestWizardProp
         return
       }
 
+      setError(null)
       setCurrentStep('participants')
     } else if (currentStep === 'participants') {
       if (participants.length === 0) {
@@ -225,6 +226,7 @@ export function SignatureRequestWizard({ documents }: SignatureRequestWizardProp
         setError('All participants must have an email address')
         return
       }
+      setError(null)
       setCurrentStep('fields')
     } else if (currentStep === 'fields') {
       // Validate that all participants have at least one signature field
@@ -237,9 +239,9 @@ export function SignatureRequestWizard({ documents }: SignatureRequestWizardProp
       }
 
       // Navigate to review step - DO NOT submit yet
+      setError(null)
       setCurrentStep('review')
     }
-    setError(null)
   }
 
   const handleBack = () => {

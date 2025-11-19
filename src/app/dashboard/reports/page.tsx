@@ -8,7 +8,7 @@ import { BarChart3, FileText, Folder, Users, TrendingUp, Clock } from 'lucide-re
 
 // Force dynamic rendering - no caching
 export const dynamic = 'force-dynamic'
-export const revalidate = 0
+
 
 export default async function ReportsPage() {
   const session = await auth()
