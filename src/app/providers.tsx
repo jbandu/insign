@@ -8,9 +8,10 @@ import { NextIntlClientProvider } from 'next-intl'
 interface ProvidersProps {
   children: React.ReactNode
   messages: any
+  locale: string
 }
 
-export function Providers({ children, messages }: ProvidersProps) {
+export function Providers({ children, messages, locale }: ProvidersProps) {
   const [queryClient] = useState(
     () =>
       new QueryClient({
@@ -24,7 +25,7 @@ export function Providers({ children, messages }: ProvidersProps) {
   )
 
   return (
-    <NextIntlClientProvider messages={messages}>
+    <NextIntlClientProvider messages={messages} locale={locale}>
       <SessionProvider>
         <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
       </SessionProvider>
