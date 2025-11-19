@@ -71,6 +71,7 @@ export function SignatureRequestWizard({ documents }: SignatureRequestWizardProp
   } = useForm<SignatureRequestInput>({
     resolver: zodResolver(signatureRequestSchema),
     defaultValues: {
+      title: 'Please review the contents and sign',
       workflowType: 'sequential',
       participants: [{ email: '', fullName: '', role: 'signer', orderIndex: 0 }],
     },
@@ -465,7 +466,7 @@ export function SignatureRequestWizard({ documents }: SignatureRequestWizardProp
                 <Input
                   id="title"
                   {...register('title')}
-                  placeholder="Employment Agreement Signature"
+                  placeholder="e.g., NDA Agreement, Employment Contract"
                   disabled={isLoading}
                 />
                 {errors.title && (
