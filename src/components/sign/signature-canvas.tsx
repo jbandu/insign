@@ -18,13 +18,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { Document, Page, pdfjs } from 'react-pdf'
+import { Document, Page } from 'react-pdf'
 import { cn } from '@/lib/utils'
-
-// Configure PDF.js worker
-if (typeof window !== 'undefined') {
-  pdfjs.GlobalWorkerOptions.workerSrc = '/pdf-worker/pdf.worker.min.mjs'
-}
+import '@/lib/pdf-config' // Import centralized PDF configuration
 
 interface Document {
   id: string
