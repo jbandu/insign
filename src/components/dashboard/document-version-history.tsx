@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -49,13 +49,7 @@ export function DocumentVersionHistory({
   const [uploadFile, setUploadFile] = useState<File | null>(null)
   const [changesDescription, setChangesDescription] = useState('')
 
-  useEffect(() => {
-    if (open) {
-      loadVersions()
-    }
-  }, [open])
-
-  const loadVersions = async () => {
+  const loadVersions = useCallback(async () => {
     setIsLoading(true)
     setError(null)
     const result = await getDocumentVersions(documentId)
@@ -65,7 +59,13 @@ export function DocumentVersionHistory({
       setError(result.error || 'Failed to load versions')
     }
     setIsLoading(false)
-  }
+  }, [documentId])
+
+  useEffect(() => {
+    if (open) {
+      loadVersions()
+    }
+  }, [loadVersions, open])
 
   const handleRestore = async (versionId: string, versionNumber: number) => {
     if (!confirm(`Are you sure you want to restore version ${versionNumber}? This will create a new version.`)) {

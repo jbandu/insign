@@ -280,7 +280,6 @@ export function SignatureCanvas({
       setSelectedField(null)
       setTypedSignature('')
       clearCanvas()
-      router.refresh()
     } else {
       setError(result.error || 'Failed to save signature')
     }
@@ -307,7 +306,6 @@ export function SignatureCanvas({
       setSelectedField(null)
       setTypedSignature('')
       clearCanvas()
-      router.refresh()
     } else {
       setError(result.error || 'Failed to save signature')
     }
@@ -443,12 +441,12 @@ export function SignatureCanvas({
                       <div
                         key={field.id}
                         className={cn(
-                          'absolute border-2 rounded flex items-center justify-center cursor-pointer transition-all',
-                          isSigned
-                            ? 'border-green-500 bg-green-50 hover:bg-green-100'
-                            : 'border-blue-500 bg-blue-50 hover:bg-blue-100 animate-pulse'
-                        )}
-                        style={{
+                      'absolute border-2 rounded flex items-center justify-center cursor-pointer transition-all',
+                      isSigned
+                        ? 'border-green-500 bg-green-50 hover:bg-green-100'
+                        : 'border-blue-500 bg-blue-50 hover:bg-blue-100 shadow-sm'
+                    )}
+                    style={{
                           left: `${field.x}px`,
                           top: `${field.y}px`,
                           width: `${field.width}px`,

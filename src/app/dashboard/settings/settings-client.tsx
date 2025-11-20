@@ -182,12 +182,12 @@ export function SettingsClient({ user, organization }: SettingsClientProps) {
         </Card>
 
         {/* Storage Usage */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Storage Usage</CardTitle>
-            <CardDescription>View your organization's storage usage</CardDescription>
-          </CardHeader>
-          <CardContent>
+          <Card>
+            <CardHeader>
+              <CardTitle>Storage Usage</CardTitle>
+              <CardDescription>View your organization&apos;s storage usage</CardDescription>
+            </CardHeader>
+            <CardContent>
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
                 <span>Used</span>

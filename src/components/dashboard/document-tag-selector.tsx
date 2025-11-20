@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { getTags, getDocumentTags, assignTagToDocument, removeTagFromDocument } from '@/app/actions/tags'
@@ -25,24 +25,24 @@ export function DocumentTagSelector({ documentId, onTagsChange }: DocumentTagSel
   const [searchQuery, setSearchQuery] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
-  useEffect(() => {
-    loadTags()
-    loadDocumentTags()
-  }, [documentId])
-
-  const loadTags = async () => {
+  const loadTags = useCallback(async () => {
     const result = await getTags()
     if (result.success && result.data) {
       setAllTags(result.data as DocumentTag[])
     }
-  }
+  }, [])
 
-  const loadDocumentTags = async () => {
+  const loadDocumentTags = useCallback(async () => {
     const result = await getDocumentTags(documentId)
     if (result.success && result.data) {
       setDocumentTags(result.data as DocumentTag[])
     }
-  }
+  }, [documentId])
+
+  useEffect(() => {
+    loadTags()
+    loadDocumentTags()
+  }, [documentId, loadDocumentTags, loadTags])
 
   const handleAssignTag = async (tagId: string) => {
     setIsLoading(true)
