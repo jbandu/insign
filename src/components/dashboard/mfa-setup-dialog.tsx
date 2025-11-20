@@ -210,8 +210,8 @@ export function MfaSetupDialog({ children }: { children?: React.ReactNode }) {
                 </Button>
               </div>
 
-              <div className="border-t pt-4">
-                <h4 className="text-sm font-medium mb-2">What you'll need:</h4>
+                <div className="border-t pt-4">
+                  <h4 className="text-sm font-medium mb-2">What you&apos;ll need:</h4>
                 <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
                   <li>An authenticator app (Google Authenticator, Authy, 1Password, etc.)</li>
                   <li>Your smartphone or tablet</li>
@@ -248,9 +248,9 @@ export function MfaSetupDialog({ children }: { children?: React.ReactNode }) {
                     <Copy className="h-4 w-4" />
                   </Button>
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  If you can't scan the QR code, enter this code manually in your app
-                </p>
+                  <p className="text-xs text-muted-foreground">
+                    If you can&apos;t scan the QR code, enter this code manually in your app
+                  </p>
               </div>
 
               <div className="space-y-2">
@@ -360,9 +360,9 @@ export function MfaSetupDialog({ children }: { children?: React.ReactNode }) {
               {showBackupCodes && backupCodes.length > 0 && (
                 <div className="border rounded-lg p-4 bg-yellow-50 dark:bg-yellow-900/20">
                   <h4 className="text-sm font-medium mb-2">Your Backup Codes</h4>
-                  <p className="text-sm text-muted-foreground mb-3">
-                    {backupCodes.length} backup codes remaining. Each can be used once.
-                  </p>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      {backupCodes.length} backup codes remaining. Each can be used once.
+                    </p>
                   <div className="grid grid-cols-2 gap-2 mb-3">
                     {backupCodes.map((code, index) => (
                       <code
@@ -389,10 +389,10 @@ export function MfaSetupDialog({ children }: { children?: React.ReactNode }) {
               <li>Adds an extra layer of security beyond your password</li>
               <li>Works with any TOTP-compatible authenticator app</li>
               <li>Backup codes can be used if you lose access to your authenticator</li>
-              <li>You'll be asked for a code each time you sign in</li>
-              <li>
-                Note: TOTP verification requires installation of 'speakeasy' and 'qrcode' npm packages
-              </li>
+                <li>You&apos;ll be asked for a code each time you sign in</li>
+                <li>
+                  Note: TOTP verification requires installation of &apos;speakeasy&apos; and &apos;qrcode&apos; npm packages
+                </li>
             </ul>
           </div>
         </div>

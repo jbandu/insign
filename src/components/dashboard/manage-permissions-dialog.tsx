@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -71,13 +71,7 @@ export function ManagePermissionsDialog({
   const [selectedPermissionLevel, setSelectedPermissionLevel] = useState<'read' | 'write' | 'delete' | 'admin'>('read')
   const [expiresAt, setExpiresAt] = useState('')
 
-  useEffect(() => {
-    if (open) {
-      loadPermissions()
-    }
-  }, [open])
-
-  const loadPermissions = async () => {
+  const loadPermissions = useCallback(async () => {
     setIsLoading(true)
     setError(null)
     const result = await getDocumentPermissions(documentId)
@@ -87,7 +81,13 @@ export function ManagePermissionsDialog({
       setError(result.error || 'Failed to load permissions')
     }
     setIsLoading(false)
-  }
+  }, [documentId])
+
+  useEffect(() => {
+    if (open) {
+      loadPermissions()
+    }
+  }, [loadPermissions, open])
 
   const handleGrantPermission = async () => {
     if (!userEmail.trim() && grantType === 'user') {

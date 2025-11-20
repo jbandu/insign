@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -22,12 +22,7 @@ export default function SharePage({ params }: SharePageProps) {
   const [document, setDocument] = useState<any | null>(null)
   const [shareInfo, setShareInfo] = useState<any | null>(null)
 
-  useEffect(() => {
-    // Attempt to verify access without password first
-    verifyAccess()
-  }, [params.token])
-
-  const verifyAccess = async (pwd?: string) => {
+  const verifyAccess = useCallback(async (pwd?: string) => {
     setIsLoading(true)
     setError(null)
 
@@ -46,7 +41,12 @@ export default function SharePage({ params }: SharePageProps) {
     }
 
     setIsLoading(false)
-  }
+  }, [params.token])
+
+  useEffect(() => {
+    // Attempt to verify access without password first
+    verifyAccess()
+  }, [verifyAccess])
 
   const handleSubmitPassword = async (e: React.FormEvent) => {
     e.preventDefault()

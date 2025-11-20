@@ -150,12 +150,12 @@ export function ShareDocumentDialog({ documentId, documentName, children }: Shar
         )}
       </DialogTrigger>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Share Document</DialogTitle>
-          <DialogDescription>
-            Create a secure link to share "{documentName}" with others
-          </DialogDescription>
-        </DialogHeader>
+          <DialogHeader>
+            <DialogTitle>Share Document</DialogTitle>
+            <DialogDescription>
+              Create a secure link to share &quot;{documentName}&quot; with others
+            </DialogDescription>
+          </DialogHeader>
 
         <div className="space-y-6">
           {/* Create New Share */}

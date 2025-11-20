@@ -892,13 +892,13 @@ export function SignatureRequestWizard({ documents }: SignatureRequestWizardProp
               <div>
                 <h3 className="font-semibold mb-2">Document</h3>
                 <div className="p-3 bg-gray-50 rounded-lg">
-                  <p className="font-medium">{selectedDocument?.name}</p>
-                  <p className="text-sm text-muted-foreground mt-1">{watch('title')}</p>
-                  {watch('message') && (
-                    <p className="text-sm text-muted-foreground mt-2 italic">"{watch('message')}"</p>
-                  )}
+                    <p className="font-medium">{selectedDocument?.name}</p>
+                    <p className="text-sm text-muted-foreground mt-1">{watch('title')}</p>
+                    {watch('message') && (
+                      <p className="text-sm text-muted-foreground mt-2 italic">&quot;{watch('message')}&quot;</p>
+                    )}
+                  </div>
                 </div>
-              </div>
 
               {/* Participants */}
               <div>
