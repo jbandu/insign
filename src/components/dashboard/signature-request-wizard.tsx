@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm, useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -60,6 +60,17 @@ export function SignatureRequestWizard({ documents }: SignatureRequestWizardProp
   const [isConverting, setIsConverting] = useState(false)
   const [convertedDocId, setConvertedDocId] = useState<string | null>(null)
   const [convertedPdfUrl, setConvertedPdfUrl] = useState<string | null>(null)
+
+  const documentFile = useMemo(() => {
+    const url = convertedPdfUrl || selectedDocument?.filePath
+    return url ? { url } : null
+  }, [convertedPdfUrl, selectedDocument?.filePath])
+
+  const pdfOptions = useMemo(() => ({
+    cMapUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/cmaps/`,
+    cMapPacked: true,
+    standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/standard_fonts/`,
+  }), [])
 
   const {
     register,
@@ -706,9 +717,9 @@ export function SignatureRequestWizard({ documents }: SignatureRequestWizardProp
               <CardContent>
                 <div className="relative">
                   {/* PDF Renderer */}
-                  {(selectedDocument?.filePath || convertedPdfUrl) ? (
+                  {documentFile ? (
                     <Document
-                      file={{ url: convertedPdfUrl || selectedDocument?.filePath || '' }}
+                      file={documentFile}
                       onLoadSuccess={({ numPages }) => setNumPages(numPages)}
                       onLoadError={(error) => {
                         console.error('PDF load error:', error)
@@ -735,11 +746,7 @@ export function SignatureRequestWizard({ documents }: SignatureRequestWizardProp
                           </div>
                         </div>
                       }
-                      options={{
-                        cMapUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/cmaps/`,
-                        cMapPacked: true,
-                        standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/standard_fonts/`,
-                      }}
+                      options={pdfOptions}
                     >
                       <div
                         className="relative cursor-crosshair inline-block"
