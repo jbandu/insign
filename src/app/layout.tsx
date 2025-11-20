@@ -6,6 +6,7 @@ import { cookies } from 'next/headers'
 import { defaultLocale, type Locale } from '@/lib/i18n-config'
 import enMessages from '../../messages/en.json'
 import esMessages from '../../messages/es.json'
+import teMessages from '../../messages/te.json'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -18,6 +19,7 @@ export const metadata: Metadata = {
 const messagesMap = {
   en: enMessages,
   es: esMessages,
+  te: teMessages,
 } as const
 
 export default async function RootLayout({

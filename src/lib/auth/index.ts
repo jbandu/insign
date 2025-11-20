@@ -5,6 +5,9 @@ import { db } from '@/lib/db'
 import { users, accounts, sessions, verificationTokens } from '@/lib/db/schema'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
+import { cookies } from 'next/headers'
+import { locales, type Locale } from '@/lib/i18n-config'
+import { eq } from 'drizzle-orm'
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET,
@@ -60,6 +63,38 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
   callbacks: {
+    async signIn({ user }) {
+      // Sync language from cookie to database on sign-in
+      // This ensures language preference set on landing page is retained after login
+      if (user?.id) {
+        try {
+          const cookieStore = await cookies()
+          const cookieLanguage = cookieStore.get('NEXT_LOCALE')?.value
+
+          // Only update if cookie has a valid language and user doesn't have a language preference
+          if (cookieLanguage && locales.includes(cookieLanguage as Locale)) {
+            const existingUser = await db.query.users.findFirst({
+              where: eq(users.id, user.id),
+            })
+
+            // Only update if user doesn't have a language preference yet
+            if (existingUser && !existingUser.language) {
+              await db
+                .update(users)
+                .set({
+                  language: cookieLanguage,
+                  updatedAt: new Date(),
+                })
+                .where(eq(users.id, user.id))
+            }
+          }
+        } catch (error) {
+          console.error('Error syncing language preference on sign-in:', error)
+          // Don't block sign-in if language sync fails
+        }
+      }
+      return true
+    },
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id
