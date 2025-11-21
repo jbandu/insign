@@ -18,6 +18,7 @@ const messagesMap = {
 
 export default getRequestConfig(async () => {
   const cookieStore = await cookies()
+  const cookieLanguage = cookieStore.get('NEXT_LOCALE')?.value
   const session = await auth()
 
   let locale: Locale = defaultLocale
@@ -37,12 +38,9 @@ export default getRequestConfig(async () => {
     }
   }
 
-  // Priority 2: Fall back to cookie if no user preference
-  if (locale === defaultLocale) {
-    const cookieLanguage = cookieStore.get('NEXT_LOCALE')?.value
-    if (cookieLanguage && locales.includes(cookieLanguage as Locale)) {
-      locale = cookieLanguage as Locale
-    }
+  // Priority 2: Fall back to cookie if no user preference was found
+  if (locale === defaultLocale && cookieLanguage && locales.includes(cookieLanguage as Locale)) {
+    locale = cookieLanguage as Locale
   }
 
   return {
