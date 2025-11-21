@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Globe, Loader2, Check } from 'lucide-react'
 import {
@@ -37,24 +37,36 @@ export function LanguageSelector({
   const [isPending, startTransition] = useTransition()
   const [selectedLanguage, setSelectedLanguage] = useState<Locale>(currentLanguage)
 
+  // Sync local state with prop when it changes
+  useEffect(() => {
+    console.log('LanguageSelector: currentLanguage prop changed to', currentLanguage)
+    setSelectedLanguage(currentLanguage)
+  }, [currentLanguage])
+
   const handleLanguageChange = async (language: Locale) => {
-    // Don't do anything if selecting the same language
-    if (language === currentLanguage) {
+    // Don't do anything if selecting the same language as currently selected
+    if (language === selectedLanguage) {
+      console.log('Language already selected:', language)
       return
     }
 
+    console.log('Changing language from', selectedLanguage, 'to', language)
     setSelectedLanguage(language)
 
     startTransition(async () => {
       try {
+        console.log('Calling server action, isAuthenticated:', isAuthenticated)
         const result = isAuthenticated
           ? await updateLanguagePreference(language)
           : await setLanguageCookie(language)
+
+        console.log('Server action result:', result)
 
         if (result.success) {
           // Call optional callback
           onLanguageChange?.(language)
 
+          console.log('Language updated successfully, reloading page...')
           // Use window.location.reload() for smoother transition
           // This prevents flickering better than router.refresh()
           window.location.reload()

@@ -22,6 +22,7 @@ import {
 import { useRouter } from 'next/navigation'
 import { LanguageSelector } from '@/components/i18n/language-selector'
 import type { Locale } from '@/lib/i18n-config'
+import { useTranslations } from 'next-intl'
 
 interface SettingsClientProps {
   user: {
@@ -41,6 +42,8 @@ interface SettingsClientProps {
 
 export function SettingsClient({ user, organization }: SettingsClientProps) {
   const router = useRouter()
+  const t = useTranslations('settings')
+  const tCommon = useTranslations('common')
   const [passwordDialogOpen, setPasswordDialogOpen] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
@@ -76,34 +79,34 @@ export function SettingsClient({ user, organization }: SettingsClientProps) {
     <>
       <div className="space-y-6">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Settings</h2>
+          <h2 className="text-3xl font-bold tracking-tight">{t('title')}</h2>
           <p className="text-muted-foreground">
-            Manage your organization and account settings
+            {t('subtitle')}
           </p>
         </div>
 
         {/* Organization Settings */}
         <Card>
           <CardHeader>
-            <CardTitle>Organization Settings</CardTitle>
+            <CardTitle>{t('organization.title')}</CardTitle>
             <CardDescription>
-              Manage your organization details and preferences
+              {t('organization.subtitle')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Organization Name</Label>
+                <Label>{t('organization.name')}</Label>
                 <Input value={organization?.name || ''} disabled />
               </div>
               <div className="space-y-2">
-                <Label>Domain</Label>
+                <Label>{t('organization.domain')}</Label>
                 <Input value={organization?.domain || ''} disabled />
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label>Subscription Tier</Label>
+              <Label>{t('organization.subscriptionTier')}</Label>
               <Input
                 value={organization?.subscriptionTier || 'trial'}
                 disabled
@@ -112,7 +115,7 @@ export function SettingsClient({ user, organization }: SettingsClientProps) {
             </div>
 
             <div className="space-y-2">
-              <Label>Status</Label>
+              <Label>{t('organization.status')}</Label>
               <Input
                 value={organization?.status || 'active'}
                 disabled
@@ -121,9 +124,9 @@ export function SettingsClient({ user, organization }: SettingsClientProps) {
             </div>
 
             <div className="flex gap-3 pt-2">
-              <Button disabled>Update Organization</Button>
+              <Button disabled>{t('organization.update')}</Button>
               <p className="text-xs text-muted-foreground self-center">
-                Contact support to update organization settings
+                {t('organization.contactSupport')}
               </p>
             </div>
           </CardContent>
@@ -132,8 +135,8 @@ export function SettingsClient({ user, organization }: SettingsClientProps) {
         {/* Profile Settings */}
         <Card>
           <CardHeader>
-            <CardTitle>Profile Settings</CardTitle>
-            <CardDescription>Manage your personal account details</CardDescription>
+            <CardTitle>{t('profile.title')}</CardTitle>
+            <CardDescription>{t('profile.subtitle')}</CardDescription>
           </CardHeader>
           <CardContent>
             <ProfileEditForm
@@ -149,33 +152,33 @@ export function SettingsClient({ user, organization }: SettingsClientProps) {
         {/* Security Settings */}
         <Card>
           <CardHeader>
-            <CardTitle>Security</CardTitle>
-            <CardDescription>Manage your password and security settings</CardDescription>
+            <CardTitle>{t('security.title')}</CardTitle>
+            <CardDescription>{t('security.subtitle')}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label>Password</Label>
+              <Label>{t('security.password')}</Label>
               <div className="flex items-center gap-3">
                 <Input type="password" value="••••••••••••" disabled className="max-w-xs" />
                 <Button onClick={() => setPasswordDialogOpen(true)}>
-                  Change Password
+                  {t('security.changePassword')}
                 </Button>
               </div>
               <p className="text-xs text-muted-foreground">
-                Last changed: Never (or date not available)
+                {t('security.lastChanged', { date: 'Never (or date not available)' })}
               </p>
             </div>
 
             <div className="space-y-2 pt-4 border-t">
-              <Label>Two-Factor Authentication</Label>
+              <Label>{t('security.twoFactor')}</Label>
               <p className="text-sm text-muted-foreground">
-                Add an extra layer of security to your account
+                {t('security.twoFactorDesc')}
               </p>
               <Button variant="outline" disabled>
-                Enable 2FA
+                {t('security.enable2FA')}
               </Button>
               <p className="text-xs text-muted-foreground">
-                2FA setup requires additional configuration
+                {t('security.requires2FASetup')}
               </p>
             </div>
           </CardContent>
@@ -184,20 +187,20 @@ export function SettingsClient({ user, organization }: SettingsClientProps) {
         {/* Storage Usage */}
         <Card>
           <CardHeader>
-            <CardTitle>Storage Usage</CardTitle>
-            <CardDescription>View your organization's storage usage</CardDescription>
+            <CardTitle>{t('storage.title')}</CardTitle>
+            <CardDescription>{t('storage.subtitle')}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
-                <span>Used</span>
+                <span>{t('storage.used')}</span>
                 <span className="font-medium">0 MB / 10 GB</span>
               </div>
               <div className="h-2 w-full rounded-full bg-gray-200">
                 <div className="h-2 rounded-full bg-primary" style={{ width: '0%' }} />
               </div>
               <p className="text-xs text-muted-foreground">
-                10 GB remaining
+                {t('storage.remaining', { amount: '10 GB' })}
               </p>
             </div>
           </CardContent>
@@ -206,14 +209,14 @@ export function SettingsClient({ user, organization }: SettingsClientProps) {
         {/* Language Preferences */}
         <Card>
           <CardHeader>
-            <CardTitle>Language Preferences</CardTitle>
+            <CardTitle>{t('language.title')}</CardTitle>
             <CardDescription>
-              Choose your preferred language for the application
+              {t('language.subtitle')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="language">Language</Label>
+              <Label htmlFor="language">{t('language.select')}</Label>
               <LanguageSelector
                 currentLanguage={(user.language as Locale) || 'en'}
                 isAuthenticated={true}
@@ -231,21 +234,21 @@ export function SettingsClient({ user, organization }: SettingsClientProps) {
           <CardHeader>
             <div className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-destructive" />
-              <CardTitle className="text-destructive">Danger Zone</CardTitle>
+              <CardTitle className="text-destructive">{t('danger.title')}</CardTitle>
             </div>
             <CardDescription>
-              Irreversible and destructive actions
+              {t('danger.subtitle')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-4">
               <div className="space-y-3">
                 <div>
-                  <h4 className="font-semibold text-sm mb-1">Delete All Data (Except Users)</h4>
+                  <h4 className="font-semibold text-sm mb-1">{t('danger.deleteData.title')}</h4>
                   <p className="text-sm text-muted-foreground">
-                    This will permanently delete all documents, signatures, templates, and other data from your organization.
+                    {t('danger.deleteData.description')}
                     <strong className="block mt-1 text-destructive">
-                      Users and organizations will be preserved, but all other data will be lost forever.
+                      {t('danger.deleteData.warning')}
                     </strong>
                   </p>
                 </div>
@@ -253,7 +256,7 @@ export function SettingsClient({ user, organization }: SettingsClientProps) {
                 {deleteSuccess && (
                   <div className="p-3 bg-green-50 border border-green-200 rounded-md">
                     <p className="text-sm text-green-800 font-medium">
-                      ✓ All data deleted successfully! Page will refresh shortly...
+                      {t('danger.deleteData.success')}
                     </p>
                   </div>
                 )}
@@ -275,12 +278,12 @@ export function SettingsClient({ user, organization }: SettingsClientProps) {
                   {isDeleting ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Deleting...
+                      {t('danger.deleteData.deleting')}
                     </>
                   ) : (
                     <>
                       <Trash2 className="h-4 w-4 mr-2" />
-                      Delete All Data
+                      {t('danger.deleteData.button')}
                     </>
                   )}
                 </Button>
@@ -288,19 +291,19 @@ export function SettingsClient({ user, organization }: SettingsClientProps) {
             </div>
 
             <div className="text-xs text-muted-foreground space-y-1">
-              <p><strong>What will be deleted:</strong></p>
+              <p><strong>{t('danger.deleteData.whatDeleted')}</strong></p>
               <ul className="list-disc list-inside space-y-0.5 ml-2">
-                <li>All documents and document versions</li>
-                <li>All signature requests and signatures</li>
-                <li>All templates and fields</li>
-                <li>All folders and tags</li>
-                <li>All API keys and webhooks</li>
-                <li>All audit logs and sessions</li>
+                <li>{t('danger.deleteData.items.documents')}</li>
+                <li>{t('danger.deleteData.items.signatures')}</li>
+                <li>{t('danger.deleteData.items.templates')}</li>
+                <li>{t('danger.deleteData.items.folders')}</li>
+                <li>{t('danger.deleteData.items.apiKeys')}</li>
+                <li>{t('danger.deleteData.items.auditLogs')}</li>
               </ul>
-              <p className="mt-2"><strong>What will be preserved:</strong></p>
+              <p className="mt-2"><strong>{t('danger.deleteData.whatPreserved')}</strong></p>
               <ul className="list-disc list-inside space-y-0.5 ml-2">
-                <li>Users and their profiles</li>
-                <li>Organizations and settings</li>
+                <li>{t('danger.deleteData.items.users')}</li>
+                <li>{t('danger.deleteData.items.organizations')}</li>
               </ul>
             </div>
           </CardContent>
@@ -318,30 +321,32 @@ export function SettingsClient({ user, organization }: SettingsClientProps) {
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2 text-destructive">
               <AlertTriangle className="h-5 w-5" />
-              Are you absolutely sure?
+              {t('danger.deleteData.confirmTitle')}
             </AlertDialogTitle>
             <AlertDialogDescription className="space-y-3">
               <p>
-                This action <strong className="text-destructive">cannot be undone</strong>. This will permanently delete:
+                {t('danger.deleteData.confirmDescription')}
               </p>
               <ul className="list-disc list-inside space-y-1 text-sm ml-2">
-                <li>All documents, signatures, and templates</li>
-                <li>All folders, tags, and permissions</li>
-                <li>All API keys, webhooks, and audit logs</li>
-                <li>All sessions and authentication data</li>
+                <li>{t('danger.deleteData.items.documents')}</li>
+                <li>{t('danger.deleteData.items.signatures')}</li>
+                <li>{t('danger.deleteData.items.templates')}</li>
+                <li>{t('danger.deleteData.items.folders')}</li>
+                <li>{t('danger.deleteData.items.apiKeys')}</li>
+                <li>{t('danger.deleteData.items.auditLogs')}</li>
               </ul>
               <p className="font-semibold">
-                Only user accounts and organization settings will be preserved.
+                {t('danger.deleteData.whatPreserved')}: {t('danger.deleteData.items.users')}, {t('danger.deleteData.items.organizations')}
               </p>
               <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md mt-3">
                 <p className="text-sm text-yellow-800">
-                  <strong>⚠️ Warning:</strong> Make sure you have backups before proceeding!
+                  {t('danger.deleteData.confirmWarning')}
                 </p>
               </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={isDeleting}>{tCommon('cancel')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteAllData}
               disabled={isDeleting}
@@ -350,10 +355,10 @@ export function SettingsClient({ user, organization }: SettingsClientProps) {
               {isDeleting ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Deleting...
+                  {t('danger.deleteData.deleting')}
                 </>
               ) : (
-                'Yes, Delete All Data'
+                t('danger.deleteData.confirmButton')
               )}
             </AlertDialogAction>
           </AlertDialogFooter>
