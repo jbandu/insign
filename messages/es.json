@@ -44,7 +44,11 @@
   "navigation": {
     "dashboard": "Panel",
     "documents": "Documentos",
+    "folders": "Carpetas",
     "signatures": "Firmas",
+    "users": "Usuarios",
+    "roles": "Roles",
+    "reports": "Informes",
     "templates": "Plantillas",
     "settings": "Configuración",
     "profile": "Perfil",
@@ -200,6 +204,28 @@
         }
       }
     }
+  },
+  "dashboard": {
+    "title": "Panel",
+    "welcome": "¡Bienvenido de nuevo, {name}!",
+    "stats": {
+      "totalUsers": "Total de Usuarios",
+      "totalUsersDesc": "Usuarios activos en su organización",
+      "documents": "Documentos",
+      "documentsDesc": "Total de documentos almacenados",
+      "pendingSignatures": "Firmas Pendientes",
+      "pendingSignaturesDesc": "En espera de firma",
+      "completed": "Completado",
+      "completedDesc": "Firmas completadas"
+    },
+    "recentDocuments": "Documentos Recientes",
+    "recentDocumentsDesc": "Sus documentos subidos recientemente",
+    "recentSignatureRequests": "Solicitudes de Firma Recientes",
+    "recentSignatureRequestsDesc": "Sus solicitudes de firma recientes",
+    "noDocuments": "Aún no hay documentos",
+    "noSignatureRequests": "Aún no hay solicitudes de firma",
+    "participant": "participante",
+    "participants": "participantes"
   },
   "signatures": {
     "title": "Firmas",
