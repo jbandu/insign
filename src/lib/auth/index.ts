@@ -71,22 +71,16 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           const cookieStore = await cookies()
           const cookieLanguage = cookieStore.get('NEXT_LOCALE')?.value
 
-          // Only update if cookie has a valid language and user doesn't have a language preference
+          // Always sync cookie language to database if a valid language cookie exists
+          // This ensures the most recent language selection is preserved
           if (cookieLanguage && locales.includes(cookieLanguage as Locale)) {
-            const existingUser = await db.query.users.findFirst({
-              where: eq(users.id, user.id),
-            })
-
-            // Only update if user doesn't have a language preference yet
-            if (existingUser && !existingUser.language) {
-              await db
-                .update(users)
-                .set({
-                  language: cookieLanguage,
-                  updatedAt: new Date(),
-                })
-                .where(eq(users.id, user.id))
-            }
+            await db
+              .update(users)
+              .set({
+                language: cookieLanguage,
+                updatedAt: new Date(),
+              })
+              .where(eq(users.id, user.id))
           }
         } catch (error) {
           console.error('Error syncing language preference on sign-in:', error)
