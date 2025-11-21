@@ -44,18 +44,24 @@ export default async function RootLayout({
         where: eq(users.id, session.user.id),
       })
 
+      console.log('[layout.tsx] User from DB:', { userId: session.user.id, language: user?.language })
+
       if (user?.language && locales.includes(user.language as Locale)) {
         locale = user.language as Locale
+        console.log('[layout.tsx] Using user DB language:', locale)
       }
     } catch (error) {
-      console.error('Error fetching user language preference:', error)
+      console.error('[layout.tsx] Error fetching user language preference:', error)
     }
   }
 
   // Priority 2: Fall back to cookie if no user preference was found
   if (locale === defaultLocale && cookieLanguage && locales.includes(cookieLanguage as Locale)) {
     locale = cookieLanguage as Locale
+    console.log('[layout.tsx] Using cookie language:', locale)
   }
+
+  console.log('[layout.tsx] Final locale:', locale)
 
   // Load messages for the current locale
   const messages = messagesMap[locale] || messagesMap[defaultLocale]

@@ -11,19 +11,25 @@ import { locales, type Locale } from '@/lib/i18n-config'
  * Update user's language preference
  */
 export async function updateLanguagePreference(language: string) {
+  console.log('[updateLanguagePreference] Called with language:', language)
   const session = await auth()
 
   if (!session?.user?.id) {
+    console.log('[updateLanguagePreference] No session or user ID')
     return { success: false, error: 'Unauthorized' }
   }
 
+  console.log('[updateLanguagePreference] User ID:', session.user.id)
+
   // Validate language
   if (!locales.includes(language as Locale)) {
+    console.log('[updateLanguagePreference] Invalid language:', language)
     return { success: false, error: 'Invalid language' }
   }
 
   try {
     // Update user's language preference in database
+    console.log('[updateLanguagePreference] Updating database...')
     await db
       .update(users)
       .set({
@@ -31,6 +37,8 @@ export async function updateLanguagePreference(language: string) {
         updatedAt: new Date(),
       })
       .where(eq(users.id, session.user.id))
+
+    console.log('[updateLanguagePreference] Database updated successfully')
 
     // Set cookie for immediate language change
     const cookieStore = await cookies()
@@ -42,9 +50,11 @@ export async function updateLanguagePreference(language: string) {
       path: '/',
     })
 
+    console.log('[updateLanguagePreference] Cookie set successfully')
+
     return { success: true, message: 'Language updated successfully' }
   } catch (error) {
-    console.error('Error updating language:', error)
+    console.error('[updateLanguagePreference] Error:', error)
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to update language',
