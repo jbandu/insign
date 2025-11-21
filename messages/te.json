@@ -205,6 +205,28 @@
       }
     }
   },
+  "dashboard": {
+    "title": "డాష్‌బోర్డ్",
+    "welcome": "తిరిగి స్వాగతం, {name}!",
+    "stats": {
+      "totalUsers": "మొత్తం వినియోగదారులు",
+      "totalUsersDesc": "మీ సంస్థలో క్రియాశీల వినియోగదారులు",
+      "documents": "పత్రాలు",
+      "documentsDesc": "నిల్వ చేయబడిన మొత్తం పత్రాలు",
+      "pendingSignatures": "పెండింగ్ సంతకాలు",
+      "pendingSignaturesDesc": "సంతకం కోసం వేచి ఉంది",
+      "completed": "పూర్తయింది",
+      "completedDesc": "పూర్తయిన సంతకాలు"
+    },
+    "recentDocuments": "ఇటీవలి పత్రాలు",
+    "recentDocumentsDesc": "మీరు ఇటీవల అప్‌లోడ్ చేసిన పత్రాలు",
+    "recentSignatureRequests": "ఇటీవలి సంతకం అభ్యర్థనలు",
+    "recentSignatureRequestsDesc": "మీ ఇటీవలి సంతకం అభ్యర్థనలు",
+    "noDocuments": "ఇంకా పత్రాలు లేవు",
+    "noSignatureRequests": "ఇంకా సంతకం అభ్యర్థనలు లేవు",
+    "participant": "పాల్గొనేవారు",
+    "participants": "పాల్గొనేవారు"
+  },
   "signatures": {
     "title": "సంతకాలు",
     "newRequest": "కొత్త సంతకం అభ్యర్థన",

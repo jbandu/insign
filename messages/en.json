@@ -205,6 +205,28 @@
       }
     }
   },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome back, {name}!",
+    "stats": {
+      "totalUsers": "Total Users",
+      "totalUsersDesc": "Active users in your organization",
+      "documents": "Documents",
+      "documentsDesc": "Total documents stored",
+      "pendingSignatures": "Pending Signatures",
+      "pendingSignaturesDesc": "Awaiting signature",
+      "completed": "Completed",
+      "completedDesc": "Signatures completed"
+    },
+    "recentDocuments": "Recent Documents",
+    "recentDocumentsDesc": "Your recently uploaded documents",
+    "recentSignatureRequests": "Recent Signature Requests",
+    "recentSignatureRequestsDesc": "Your recent signature requests",
+    "noDocuments": "No documents yet",
+    "noSignatureRequests": "No signature requests yet",
+    "participant": "participant",
+    "participants": "participants"
+  },
   "signatures": {
     "title": "Signatures",
     "newRequest": "New Signature Request",

@@ -7,6 +7,7 @@ import { Users, FileText, FileSignature, TrendingUp } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { formatDistanceToNow } from 'date-fns'
 import Link from 'next/link'
+import { getTranslations } from 'next-intl/server'
 
 // Force dynamic rendering - no caching
 export const dynamic = 'force-dynamic'
@@ -14,6 +15,7 @@ export const dynamic = 'force-dynamic'
 
 export default async function DashboardPage() {
   const session = await auth()
+  const t = await getTranslations('dashboard')
 
   if (!session?.user?.id) {
     return null
@@ -92,9 +94,9 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
+        <h2 className="text-3xl font-bold tracking-tight">{t('title')}</h2>
         <p className="text-muted-foreground">
-          Welcome back, {currentUser?.firstName || session.user.email}!
+          {t('welcome', { name: currentUser?.firstName || session.user.email })}
         </p>
       </div>
 
@@ -102,26 +104,26 @@ export default async function DashboardPage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('stats.totalUsers')}</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.totalUsers}</div>
             <p className="text-xs text-muted-foreground">
-              Active users in your organization
+              {t('stats.totalUsersDesc')}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Documents</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('stats.documents')}</CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.totalDocuments}</div>
             <p className="text-xs text-muted-foreground">
-              Total documents stored
+              {t('stats.documentsDesc')}
             </p>
           </CardContent>
         </Card>
@@ -129,27 +131,27 @@ export default async function DashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Pending Signatures
+              {t('stats.pendingSignatures')}
             </CardTitle>
             <FileSignature className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.pendingSignatures}</div>
             <p className="text-xs text-muted-foreground">
-              Awaiting signature
+              {t('stats.pendingSignaturesDesc')}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Completed</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('stats.completed')}</CardTitle>
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.completedSignatures}</div>
             <p className="text-xs text-muted-foreground">
-              Signatures completed
+              {t('stats.completedDesc')}
             </p>
           </CardContent>
         </Card>
@@ -159,14 +161,14 @@ export default async function DashboardPage() {
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Recent Documents</CardTitle>
+            <CardTitle>{t('recentDocuments')}</CardTitle>
             <CardDescription>
-              Your recently uploaded documents
+              {t('recentDocumentsDesc')}
             </CardDescription>
           </CardHeader>
           <CardContent>
             {recentDocuments.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No documents yet</p>
+              <p className="text-sm text-muted-foreground">{t('noDocuments')}</p>
             ) : (
               <div className="space-y-3">
                 {recentDocuments.map((doc) => (
@@ -199,15 +201,15 @@ export default async function DashboardPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Recent Signature Requests</CardTitle>
+            <CardTitle>{t('recentSignatureRequests')}</CardTitle>
             <CardDescription>
-              Your recent signature requests
+              {t('recentSignatureRequestsDesc')}
             </CardDescription>
           </CardHeader>
           <CardContent>
             {recentSignatureRequests.length === 0 ? (
               <p className="text-sm text-muted-foreground">
-                No signature requests yet
+                {t('noSignatureRequests')}
               </p>
             ) : (
               <div className="space-y-3">
@@ -231,7 +233,7 @@ export default async function DashboardPage() {
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium truncate">{request.title}</p>
                         <p className="text-xs text-muted-foreground">
-                          {request.participants.length} participant{request.participants.length !== 1 ? 's' : ''}
+                          {request.participants.length} {request.participants.length !== 1 ? t('participants') : t('participant')}
                           {request.createdAt && (
                             <>
                               {' • '}
