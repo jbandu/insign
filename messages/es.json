@@ -44,7 +44,11 @@
   "navigation": {
     "dashboard": "Panel",
     "documents": "Documentos",
+    "folders": "Carpetas",
     "signatures": "Firmas",
+    "users": "Usuarios",
+    "roles": "Roles",
+    "reports": "Informes",
     "templates": "Plantillas",
     "settings": "Configuración",
     "profile": "Perfil",

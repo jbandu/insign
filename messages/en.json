@@ -44,7 +44,11 @@
   "navigation": {
     "dashboard": "Dashboard",
     "documents": "Documents",
+    "folders": "Folders",
     "signatures": "Signatures",
+    "users": "Users",
+    "roles": "Roles",
+    "reports": "Reports",
     "templates": "Templates",
     "settings": "Settings",
     "profile": "Profile",

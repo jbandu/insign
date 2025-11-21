@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { cn } from '@/lib/utils'
 import {
   LayoutDashboard,
@@ -16,42 +17,42 @@ import {
 
 const navItems = [
   {
-    title: 'Dashboard',
+    key: 'dashboard',
     href: '/dashboard',
     icon: LayoutDashboard,
   },
   {
-    title: 'Documents',
+    key: 'documents',
     href: '/dashboard/documents',
     icon: FileText,
   },
   {
-    title: 'Folders',
+    key: 'folders',
     href: '/dashboard/folders',
     icon: Folder,
   },
   {
-    title: 'Signatures',
+    key: 'signatures',
     href: '/dashboard/signatures',
     icon: FileSignature,
   },
   {
-    title: 'Users',
+    key: 'users',
     href: '/dashboard/users',
     icon: Users,
   },
   {
-    title: 'Roles',
+    key: 'roles',
     href: '/dashboard/roles',
     icon: Shield,
   },
   {
-    title: 'Reports',
+    key: 'reports',
     href: '/dashboard/reports',
     icon: BarChart3,
   },
   {
-    title: 'Settings',
+    key: 'settings',
     href: '/dashboard/settings',
     icon: Settings,
   },
@@ -59,6 +60,7 @@ const navItems = [
 
 export function DashboardNav() {
   const pathname = usePathname()
+  const t = useTranslations('navigation')
 
   return (
     <nav className="w-64 border-r bg-gray-50 p-4">
@@ -79,7 +81,7 @@ export function DashboardNav() {
               )}
             >
               <Icon className="h-5 w-5" />
-              {item.title}
+              {t(item.key)}
             </Link>
           )
         })}

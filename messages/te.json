@@ -44,7 +44,11 @@
   "navigation": {
     "dashboard": "డాష్‌బోర్డ్",
     "documents": "పత్రాలు",
+    "folders": "ఫోల్డర్లు",
     "signatures": "సంతకాలు",
+    "users": "వినియోగదారులు",
+    "roles": "పాత్రలు",
+    "reports": "నివేదికలు",
     "templates": "టెంప్లేట్లు",
     "settings": "సెట్టింగులు",
     "profile": "ప్రొఫైల్",
